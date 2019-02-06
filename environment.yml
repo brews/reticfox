@@ -1,0 +1,15 @@
+name: icesm_parse
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - bottleneck
+  - dask
+  - gsw
+  - netcdf4
+  - pip
+  - pyngl
+  - python>=3.6
+  - xarray
+  - pip:
+    - globus-cli
