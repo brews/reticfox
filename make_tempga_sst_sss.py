@@ -8,11 +8,15 @@ import xarray as xr
 import gsw
 from tqdm import tqdm
 
-
-TEMP_GLOB_PATTERN = 'b.e12.B1850C5.f19_g16.i21ka.03.pop.h.TEMP.*.nc'
+CASENAME = 'b.e12.B1850C5.f19_g16.i21ka.03'
+OUT_DIR = '.'
+TEMP_GLOB_PATTERN = '{}.pop.h.TEMP.*.nc'.format(CASENAME)
 INSITU_TEMP_STR = 'tos'
 GAMMA_TEMP_STR = 'toGA'
 SSS_STR = 'sos'
+SSS_OUT = '{}.pop.h.{}.nc'.format(CASENAME, SSS_STR)
+GAMMA_TEMP_OUT = '{}.pop.h.{}.nc'.format(CASENAME, GAMMA_TEMP_STR)
+INSITU_TEMP_OUT = '{}.pop.h.{}.nc'.format(CASENAME, INSITU_TEMP_STR)
 CUTOFF_Z = 25000  # Depth in cm. Selecting by z_t also keeps z_w_bot below the CUTOFF_Z too, in this case.
 
 
@@ -83,23 +87,6 @@ def tex86_gammaavg_depth(ds, target_var='TEMP'):
     return temp_gamma_avg
 
 
-# theta = xr.open_dataset('b.e12.B1850C5.f19_g16.i21ka.03.pop.h.TEMP.000101-009912.nc').sel(z_t=slice(0, CUTOFF_Z))
-# salt = xr.open_dataset('b.e12.B1850C5.f19_g16.i21ka.03.pop.h.SALT.000101-009912.nc').sel(z_t=slice(0, CUTOFF_Z))
-# # Because using z_t slice doesn't get z_w which has depth layers' bounds.
-# theta = theta.sel(z_w_bot=slice(0, CUTOFF_Z))
-# theta = theta.isel(z_w=slice(0, len(theta.z_w_bot)))
-# theta = theta.isel(z_w_top=slice(0, len(theta.z_w_bot)))
-
-# # First get in-situ temps from potential temps (TEMP), add to theta
-# theta = pot2insitu_temp(theta, salt, insitu_temp_name=INSITU_TEMP_STR)
-
-# # get gamma average, add to theta
-# ga = tex86_gammaavg_depth(theta, target_var=INSITU_TEMP_STR)
-# ga.name = GAMMA_TEMP_STR
-# theta[GAMMA_TEMP_STR] = ga
-# theta[GAMMA_TEMP_STR].attrs['units'] = 'degC'
-# theta[GAMMA_TEMP_STR].attrs['long_name'] = 'Sea Temperature (Gamma-average)'
-
 gamma_temp_files = []
 sst_files = []
 sss_files = []
@@ -141,17 +128,10 @@ for tfl in tempfiles:
 
 # Now combine the multiple files of same variable, condense to single NetCDF.
 # The diff files represent different times.
-for var_files in [gamma_temp_files, sst_files, sss_files]:
+outfl_ncs = [(GAMMA_TEMP_OUT, gamma_temp_files), (INSITU_TEMP_OUT, sst_files), (SSS_OUT, sss_files)]
+for fl_name, var_files in outfl_ncs:
     var_files.sort()
-
-    # This should lopp-off the file name but leave the variable:
-    join_fl_name = '.'.join(var_files[0].split('.')[:-2]) + '.nc'
-
-    # Open multiple files and write to `join_fl_name`.
+    # Open multiple files and write to `fl_name`.
     ds = xr.open_mfdataset(var_files)
     ds = ds.sortby('time')
-    ds.to_netcdf(join_fl_name)
-
-# tempga = xr.open_mfdataset('b.e12.B1850C5.f19_g16.i21ka.03.pop.h.TEMPGA.*.nc')
-# tempga_sort = tempga.sortby('time')
-# tempga_sort.to_netcdf('b.e12.B1850C5.f19_g16.i21ka.03.pop.h.TEMPGA.nc')
+    ds.to_netcdf(fl_name)
