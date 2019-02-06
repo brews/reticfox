@@ -1,8 +1,10 @@
 # Parse iCESM to get ts and tas netcdf files.
 # Should have TS and TREFHT files in pwd.
 
+
 import os
 import xarray as xr
+
 
 CASENAME = 'b.e12.B1850C5.f19_g16.i21ka.03'
 OUT_DIR = '.'
