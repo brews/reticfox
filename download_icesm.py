@@ -93,7 +93,8 @@ def globus_transfer(from_endpoint, from_dir, to_endpoint, to_dir, task_label=Non
         cmd_template.append("--label")
         cmd_template.append(str(task_label))
 
-    subprocess.run(cmd_template, check=True)
+    subprocess.run(cmd_template, check=True,
+                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     log.debug('created globus transfer task from {}:{} to {}:{}'.format(
         from_endpoint, from_dir, to_endpoint, to_dir))
 
@@ -147,7 +148,7 @@ if __name__ == '__main__':
                         help='iCESM experiment case name')
     parser.add_argument('--downloadpath', metavar='DOWNLOADPATH', nargs=1,
                         default=[None],
-                        help='directory files will be transferred to to. PWD is default. Will be created if it doesnt exist.')
+                        help='directory files will be transferred to. PWD is default. Will be created if it doesnt exist.')
     parser.add_argument('--log', metavar='LOGPATH', nargs=1, default=[None],
                         help='file path that log will be written to')
     args = parser.parse_args()
@@ -161,7 +162,12 @@ if __name__ == '__main__':
     if dl_path is None:
         dl_path = os.getcwd()
 
+    # Create dl path if doesn't exist.
+    dl_path = pathlib.Path(dl_path)
+    dl_path.mkdir(parents=True, exist_ok=True)
+
     casename = str(args.casename[0])
+
     atm_variables = ['PRECC',
                      'PRECL',
                      'PRECSC',
@@ -192,10 +198,6 @@ if __name__ == '__main__':
                      'TEMP',
                      'SALT',
                      ]
-
-    # Create dl path if doesn't exist.
-    dl_path = pathlib.Path(dl_path)
-    dl_path.mkdir(parents=True, exist_ok=True)
 
     download_icesm(casename=casename, download_path=dl_path,
                    atm_variables=atm_variables, ocn_variables=ocn_variables)
