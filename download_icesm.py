@@ -54,10 +54,10 @@ def transfer(from_dir, to_dir):
 # Use globus to load needed files from NCAR. Assumes you ran `globus login` from shell before:
 CASENAME = 'b.e12.B1850C5.f19_g16.i21ka.03'
 DOWNLOAD_PATH = os.getcwd()
-atm_variables = ['PRECRC',
-                'PRECRL',
-                'PRECSC',
-                'PRECSL',
+atm_variables = ['PRECC',
+                 'PRECL',
+                 'PRECSC',
+                 'PRECSL',
                 'TS',
                 'TREFHT',
                 'PRECRC_H218Or',
