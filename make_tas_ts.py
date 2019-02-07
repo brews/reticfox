@@ -17,7 +17,7 @@ OUT_TAS = '{}.cam.h0.{}.nc'.format(CASENAME, TAS_STR)
 
 
 if NCAR_DOWNLOAD:
-    import globus_icesm.transfer
+    import globus_icesm
 
     variables = ['TS',
                  'TREFHT',

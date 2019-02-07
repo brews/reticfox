@@ -22,9 +22,8 @@ INSITU_TEMP_OUT = '{}.pop.h.{}.nc'.format(CASENAME, INSITU_TEMP_STR)
 CUTOFF_Z = 25000  # Depth in cm. Selecting by z_t also keeps z_w_bot below the CUTOFF_Z too, in this case.
 
 
-
 if NCAR_DOWNLOAD:
-    import globus_icesm.transfer
+    import globus_icesm
 
     variables = ['TEMP',
                  'SALT',

@@ -21,7 +21,7 @@ IN_PRE = [x.format(CASENAME) for x in IN_PRE]
 
 
 if NCAR_DOWNLOAD:
-    import globus_icesm.transfer
+    import globus_icesm
 
     variables = ['PRECRC',
                  'PRECRL',

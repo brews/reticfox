@@ -43,7 +43,7 @@ ptiny = 1e-18
 
 
 if NCAR_DOWNLOAD:
-    import globus_icesm.transfer
+    import globus_icesm
 
     variables = ['PRECRC_H218Or',
                  'PRECRL_H218OR',
