@@ -31,7 +31,7 @@ def transfer(from_dir, to_dir):
         raise KeyError('could not find local endpoint')
 
     # Endpoint we download from
-    epremote = subprocess.run(["globus", "endpoint", "search", "NCAR Campaign Storage", "--filter-owner-id", "ncar@globusid.org", "--jq", "DATA[0].id", "--format", "UNIX"], 
+    epremote = subprocess.run(["globus", "endpoint", "search", "NCAR Campaign Storage", "--filter-owner-id", "ncar@globusid.org", "--jq", "DATA[0].id", "--format", "UNIX", "--label", "download_icesm.py"], 
         check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if epremote.returncode == 0 and epremote.returncode != b'None\n':
         endpoint_remote = epremote.stdout.rstrip().decode('utf-8')
