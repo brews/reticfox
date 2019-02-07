@@ -22,7 +22,7 @@ if NCAR_DOWNLOAD:
     variables = ['TS',
                  'TREFHT',
                 ]
-    from_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/cam/proc/tseries/monthly/{}/'
+    from_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/atm/proc/tseries/monthly/{}/'
     to_d = '.'
 
     for variable in variables:

@@ -17,7 +17,7 @@ R18O_BLOB = '{}.pop.h.R18O.*.nc'.format(CASENAME)
 if NCAR_DOWNLOAD:
     import globus_icesm
     
-    from_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/pop/proc/tseries/monthly/R18O/'
+    from_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/ocn/proc/tseries/monthly/R18O/'
     from_d = from_template.format(CASENAME)
     to_d = '.'
     globus_icesm.transfer(from_dir=from_d, to_dir=to_d)

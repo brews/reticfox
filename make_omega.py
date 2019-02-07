@@ -21,7 +21,7 @@ TARGET_HGTS = [500.0]
 if NCAR_DOWNLOAD:
     import globus_icesm
     
-    from_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/cam/proc/tseries/monthly/OMEGA/'
+    from_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/atm/proc/tseries/monthly/OMEGA/'
     from_d = from_template.format(CASENAME)
     to_d = '.'
     globus_icesm.transfer(from_dir=from_d, to_dir=to_d)
