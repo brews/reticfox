@@ -7,24 +7,13 @@ import xarray as xr
 import Ngl
 
 
-# Use globus to load needed files from NCAR. Assumes you ran `globus login` from shell before:
-NCAR_DOWNLOAD = True  
 CASENAME = 'b.e12.B1850C5.f19_g16.i21ka.03'
-OUT_DIR = '.'
+OUT_DIR = ''
 OMEGA_STR = 'omega500'
 OUT_NC = '{}.cam.h0.{}.nc'.format(CASENAME, OMEGA_STR)
 PS_IN = '{}.cam.h0.PS.0001-0900.nc'.format(CASENAME)
 OMEGA_IN = '{}.cam.h0.OMEGA.0001-0900.nc'.format(CASENAME)
 TARGET_HGTS = [500.0]
-
-
-if NCAR_DOWNLOAD:
-    import globus_icesm
-    
-    from_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/atm/proc/tseries/monthly/OMEGA/'
-    from_d = from_template.format(CASENAME)
-    to_d = '.'
-    globus_icesm.transfer(from_dir=from_d, to_dir=to_d)
 
 
 ps = xr.open_dataset(PS_IN)

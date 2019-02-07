@@ -8,10 +8,8 @@ import xarray as xr
 import gsw
 
 
-# Use globus to load needed files from NCAR. Assumes you ran `globus login` from shell before:
-NCAR_DOWNLOAD = True  
 CASENAME = 'b.e12.B1850C5.f19_g16.i21ka.03'
-OUT_DIR = '.'
+OUT_DIR = ''
 TEMP_GLOB_PATTERN = '{}.pop.h.TEMP.*.nc'.format(CASENAME)
 INSITU_TEMP_STR = 'tos'
 GAMMA_TEMP_STR = 'toGA'
@@ -20,20 +18,6 @@ SSS_OUT = '{}.pop.h.{}.nc'.format(CASENAME, SSS_STR)
 GAMMA_TEMP_OUT = '{}.pop.h.{}.nc'.format(CASENAME, GAMMA_TEMP_STR)
 INSITU_TEMP_OUT = '{}.pop.h.{}.nc'.format(CASENAME, INSITU_TEMP_STR)
 CUTOFF_Z = 25000  # Depth in cm. Selecting by z_t also keeps z_w_bot below the CUTOFF_Z too, in this case.
-
-
-if NCAR_DOWNLOAD:
-    import globus_icesm
-
-    variables = ['TEMP',
-                 'SALT',
-                ]
-    from_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/ocn/proc/tseries/monthly/{}/'
-    to_d = '.'
-
-    for variable in variables:
-        from_d = from_template.format(CASENAME, variable)
-        globus_icesm.transfer(from_dir=from_d, to_dir=to_d)
 
 
 def pot2insitu_temp(theta, salt, insitu_temp_name='insitu_temp'):
