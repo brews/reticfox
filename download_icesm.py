@@ -1,4 +1,5 @@
 # Stupid wrapper for `globus-cli` to load cesm files from NCAR server.
+# Assumes you've already logged in to globus from shell with `globus login`
 #
 # Can run from Bash with:
 #
@@ -6,8 +7,7 @@
 #     --casename b.e12.B1850C5.f19_g16.i21ka.03 \
 #     --downloadpath /xdisk/malevich/transferstuff
 #
-# See help with `python run_assimilation_report.py --help`.
-# Otherwise you're going to want to import and run through `main()`.
+# See help with `python download_icesm.py --help`.
 
 import os
 import pathlib
@@ -113,7 +113,8 @@ def download_icesm(casename, download_path, atm_variables, ocn_variables):
     atm_variables : list of strs
 
     """
-    log.debug('begin creating globus transfers for {} to {}'.format(casename, download_path))
+    log.debug('begin creating globus transfers for {} to {}'.format(
+        casename, download_path))
     ncar_endpoint = globus_find_endpoint(
         searchname='NCAR Campaign Storage', owner_id='ncar@globusid.org')
     uahpc_endpoint = globus_find_endpoint(
@@ -135,6 +136,7 @@ def download_icesm(casename, download_path, atm_variables, ocn_variables):
         globus_transfer(from_endpoint=ncar_endpoint, from_dir=from_d,
                         to_endpoint=uahpc_endpoint, to_dir=download_path)
     log.debug('globus transfers created')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
