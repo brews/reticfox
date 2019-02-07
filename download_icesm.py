@@ -1,4 +1,5 @@
 import os
+import pathlib
 import globus_icesm
 
 # Use globus to load needed files from NCAR. Assumes you ran `globus login` from shell before:
@@ -35,6 +36,9 @@ ocn_variables = ['R18O',
                  'SALT',
             ]
 
+
+DOWNLOAD_PATH = pathlib.Path(DOWNLOAD_PATH)
+DOWNLOAD_PATH.mkdir(parents=True, exist_ok=True)
 
 from_atm_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/atm/proc/tseries/monthly/{}/'
 for variable in atm_variables:
