@@ -22,7 +22,7 @@ def transfer(from_dir, to_dir):
     eplocal = subprocess.run(["globus", "endpoint", "search", "arizona#sdmz-dtn", 
                             "--filter-owner-id", "tmerritt@arizona.edu", 
                             "--jq", "DATA[0].id", "--format", "UNIX"], 
-        check=True, capture_output=True)
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if eplocal.returncode == 0 and eplocal.returncode != b'None\n':
         endpoint_local = eplocal.stdout.rstrip().decode('utf-8')
     else:
@@ -30,7 +30,7 @@ def transfer(from_dir, to_dir):
 
     # Endpoint we download from
     epremote = subprocess.run(["globus", "endpoint", "search", "NCAR Campaign Storage", "--filter-owner-id", "ncar@globusid.org", "--jq", "DATA[0].id", "--format", "UNIX"], 
-        check=True, capture_output=True)
+        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if epremote.returncode == 0 and epremote.returncode != b'None\n':
         endpoint_remote = epremote.stdout.rstrip().decode('utf-8')
     else:
