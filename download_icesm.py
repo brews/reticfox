@@ -156,8 +156,8 @@ if __name__ == '__main__':
                             filename=args.log[0],
                             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
-    dl_path = None
-    if args.downloadpath[0] is None:
+    dl_path = args.downloadpath[0]
+    if dl_path is None:
         dl_path = os.getcwd()
 
     casename = str(args.casename[0])
