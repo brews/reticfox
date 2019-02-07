@@ -122,19 +122,20 @@ def download_icesm(casename, download_path, atm_variables, ocn_variables):
 
     assert ncar_endpoint is not None or uahpc_endpoint is not None, 'could not get globus endpoint IDs'
 
+    lab = 'download_icesm_py'
     # Load files from atmosphere component
     from_atm_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/atm/proc/tseries/monthly/{}/'
     for variable in atm_variables:
         from_d = from_atm_template.format(casename, variable)
         globus_transfer(from_endpoint=ncar_endpoint, from_dir=from_d,
-                        to_endpoint=uahpc_endpoint, to_dir=download_path)
+                        to_endpoint=uahpc_endpoint, to_dir=download_path, task_label=lab)
 
     # Load files from ocean component
     from_ocn_template = '/gpfs/csfs1/univ/uazn0013/jiangzhu/archive/{}/ocn/proc/tseries/monthly/{}/'
     for variable in ocn_variables:
         from_d = from_ocn_template.format(casename, variable)
         globus_transfer(from_endpoint=ncar_endpoint, from_dir=from_d,
-                        to_endpoint=uahpc_endpoint, to_dir=download_path)
+                        to_endpoint=uahpc_endpoint, to_dir=download_path, task_label=lab)
     log.debug('globus transfers created')
 
 
