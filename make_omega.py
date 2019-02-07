@@ -19,7 +19,7 @@ TARGET_HGTS = [500.0]
 ps = xr.open_dataset(PS_IN)
 omega = xr.open_dataset(OMEGA_IN)
 
-omega500 = Ngl.vinth2p(omega.OMEGA.values, omega.hyam.values, omega.hybm.values, 
+omega500 = Ngl.vinth2p(omega.OMEGA.values, omega.hyam.values, omega.hybm.values,
                        TARGET_HGTS, ps.PS.values, 1, 1000.0, 1, True)
 
 # Setup pressure coordinates

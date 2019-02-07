@@ -17,12 +17,13 @@ SSS_STR = 'sos'
 SSS_OUT = '{}.pop.h.{}.nc'.format(CASENAME, SSS_STR)
 GAMMA_TEMP_OUT = '{}.pop.h.{}.nc'.format(CASENAME, GAMMA_TEMP_STR)
 INSITU_TEMP_OUT = '{}.pop.h.{}.nc'.format(CASENAME, INSITU_TEMP_STR)
-CUTOFF_Z = 25000  # Depth in cm. Selecting by z_t also keeps z_w_bot below the CUTOFF_Z too, in this case.
+# Depth in cm. Selecting by z_t also keeps z_w_bot below the CUTOFF_Z too, in this case.
+CUTOFF_Z = 25000
 
 
 def pot2insitu_temp(theta, salt, insitu_temp_name='insitu_temp'):
     """Add 'insitu-temp' variable to potential temperature (theta) and salinity (salt) dataset
-    """ 
+    """
     # Convert depth (cm) to (m) & positive up.
     z_m = -theta.z_t.values * 0.01
 
@@ -33,13 +34,13 @@ def pot2insitu_temp(theta, salt, insitu_temp_name='insitu_temp'):
     p = gsw.p_from_z(np.tile(z_m, (*latlon_shape[::-1], 1)).T,
                      np.tile(theta.TLAT, (n_depth, 1, 1)))
 
-
     # Using nan mask and broadcasting to work around missing values.
     # I think this will be more memory efficient than proper masked arrays.
     isnan_msk = np.isnan(salt.SALT)
     t_insitu = np.empty(theta.TEMP.shape)
-    t_insitu[~isnan_msk] = gsw.pt_from_t(salt.SALT.values[~isnan_msk], 
-                                         theta.TEMP.values[~isnan_msk], np.array([0]), 
+    t_insitu[~isnan_msk] = gsw.pt_from_t(salt.SALT.values[~isnan_msk],
+                                         theta.TEMP.values[~isnan_msk], np.array([
+                                                                                 0]),
                                          np.broadcast_to(p, salt.SALT.shape)[~isnan_msk])
     t_insitu[isnan_msk] = np.nan
 
@@ -62,27 +63,28 @@ def tex86_gammaavg_depth(ds, target_var='TEMP'):
     # # If you want to see plot of gamma weights over depth.
     # ideal_depths = np.arange(0, 22510, 10)  # in cm
     # gamma_pdf = stats.gamma.pdf(ideal_depths, a=GAMMA_A, scale=GAMMA_B)
-    # plt.plot(ideal_depths, gamma_pdf);plt.xlabel('depth (cm)');plt.show()  
+    # plt.plot(ideal_depths, gamma_pdf);plt.xlabel('depth (cm)');plt.show()
 
-    # Diff of CDF between bottom of depth "bin" and top of depth "bin". - i.e. 
-    # the gamma distribution mass within the depth "bin". We're using DataArrays 
+    # Diff of CDF between bottom of depth "bin" and top of depth "bin". - i.e.
+    # the gamma distribution mass within the depth "bin". We're using DataArrays
     # with depth index to ensure this compares apples to apples along depth.
-    shallow_cdf = xr.DataArray(stats.gamma.cdf(ds.z_w_top, GAMMA_A, scale=GAMMA_B), 
+    shallow_cdf = xr.DataArray(stats.gamma.cdf(ds.z_w_top, GAMMA_A, scale=GAMMA_B),
                                coords=[ds.z_t], dims=['z_t'])
-    deep_cdf = xr.DataArray(stats.gamma.cdf(ds.z_w_bot, GAMMA_A, scale=GAMMA_B), 
+    deep_cdf = xr.DataArray(stats.gamma.cdf(ds.z_w_bot, GAMMA_A, scale=GAMMA_B),
                             coords=[ds.z_t], dims=['z_t'])
     gamma_weights = deep_cdf - shallow_cdf
     # Can see weights with `gamma_weights.plot()`
 
     # gamma_weights /= gamma_weights.sum()  # Normalize, no - not like this... <-
     # Normalize, careful to consider grid points with missing depth values:
-    gamma_weights_norm = gamma_weights / (ds[target_var].notnull() * gamma_weights).sum('z_t') 
+    gamma_weights_norm = gamma_weights / \
+        (ds[target_var].notnull() * gamma_weights).sum('z_t')
     temp_gamma_avg = (ds[target_var] * gamma_weights_norm).sum(dim='z_t')
-    # Boom. `temp_gamma_avg` should be it. You can write to netcdf with 
+    # Boom. `temp_gamma_avg` should be it. You can write to netcdf with
     # `temp_gamma_avg.to_netcdf('filename.nc')`
 
     # Put nans where the top of the original dataarray had nans.
-    isnan_msk = ds[target_var].isel(z_t=0).isnull() 
+    isnan_msk = ds[target_var].isel(z_t=0).isnull()
     temp_gamma_avg.values[isnan_msk] = np.nan
     return temp_gamma_avg
 
@@ -92,7 +94,7 @@ sst_files = []
 sss_files = []
 tempfiles = glob(TEMP_GLOB_PATTERN)
 for tfl in tempfiles:
-    out_template = tfl.replace('.TEMP.', '.{}.') 
+    out_template = tfl.replace('.TEMP.', '.{}.')
     sfl = tfl.replace('.TEMP.', '.SALT.')
     theta = xr.open_dataset(tfl).sel(z_t=slice(0, CUTOFF_Z))
     salt = xr.open_dataset(sfl).sel(z_t=slice(0, CUTOFF_Z))
@@ -128,7 +130,8 @@ for tfl in tempfiles:
 
 # Now combine the multiple files of same variable, condense to single NetCDF.
 # The diff files represent different times.
-outfl_ncs = [(GAMMA_TEMP_OUT, gamma_temp_files), (INSITU_TEMP_OUT, sst_files), (SSS_OUT, sss_files)]
+outfl_ncs = [(GAMMA_TEMP_OUT, gamma_temp_files),
+             (INSITU_TEMP_OUT, sst_files), (SSS_OUT, sss_files)]
 for fl_name, var_files in outfl_ncs:
     var_files.sort()
     # Open multiple files and write to `fl_name`.

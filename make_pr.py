@@ -19,5 +19,5 @@ IN_PRE = [x.format(CASENAME) for x in IN_PRE]
 
 
 pre = xr.open_mfdataset(IN_PRE)
-pre[PR_STR] = pre['PRECC'] + pre['PRECL'] + pre['PRECSC'] + pre['PRECSL'] 
+pre[PR_STR] = pre['PRECC'] + pre['PRECL'] + pre['PRECSC'] + pre['PRECSL']
 pre[[PR_STR]].to_netcdf(os.path.join(OUT_DIR, OUT_FILE))

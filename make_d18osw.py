@@ -1,4 +1,4 @@
-# Parse Deuterium (δD; precip) and d18O (precip) from iCESM cam experiment 
+# Parse Deuterium (δD; precip) and d18O (precip) from iCESM cam experiment
 # slice output. Assumes raw NetCDF files (below) are in the pwd.
 
 import os
@@ -21,4 +21,3 @@ r18o[D18OSW_STR].attrs['units'] = 'permil'
 # Dump to file
 r18o[[D18OSW_STR]].to_netcdf(os.path.join(OUT_DIR, D18OSW_OUT))
 r18o.close()
-
