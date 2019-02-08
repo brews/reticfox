@@ -55,6 +55,8 @@ CASENAME="b.e12.B1850C5.f19_g16.i21ka.03"
 IN_DIR="/xdisk/malevich/$CASENAME"
 OUT_DIR="/rsgrps/jesst/icesm/$CASENAME"
 
+date
+
 mkdir -p $OUT_DIR
 
 # atm output
@@ -121,3 +123,5 @@ python make_d18osw.py \
     --r18o_glob "$IN_DIR/*.R18O.*.nc" \
     --d18osw_str "d18osw" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.d18osw.nc"
+
+date
