@@ -94,7 +94,7 @@ python make_omega.py \
     --omega_glob "$IN_DIR/*.OMEGA.*.nc" \
     --ps_glob "$IN_DIR/*.PS.*.nc" \
     --omega_str "omega" \
-    --outfl "$OUT_DIR/$CASENAME.cam.h.omega.nc"
+    --outfl "$OUT_DIR/$CASENAME.cam.h0.omega.nc"
 
 python make_ddp.py \
     --precrl_h2o_glob "$IN_DIR/*.PRECRL_H2OR.*.nc" \
