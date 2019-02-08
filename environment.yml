@@ -6,7 +6,7 @@ dependencies:
   - bottleneck
   - dask
   - gsw
-  - netcdf4
+  - netCDF4
   - pip
   - pyngl
   - python>=3.6
