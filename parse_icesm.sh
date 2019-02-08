@@ -12,7 +12,7 @@
 ### Minimize resource requests (ncpus, mem, walltime, cputime, etc) to minimize queue wait delays
 
 ### Set the job name
-#PBS -N icesm_parserbase
+#PBS -N icesm_parser
 
 ### Request email when job begins and ends
 #PBS -m bea
