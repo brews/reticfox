@@ -31,8 +31,8 @@ def parse_icesm(precrc_h216o_glob, precrl_h216o_glob, precsc_h216o_glob, precsl_
     """
     ptiny = 1e-18
 
-    globs = list(precrc_h216o_glob, precrl_h216o_glob, precsc_h216o_glob, precsl_h216o_glob,
-                 precrc_h218o_glob, precrl_h218o_glob, precsc_h218o_glob, precsl_h218o_glob)
+    globs = [precrc_h216o_glob, precrl_h216o_glob, precsc_h216o_glob, precsl_h216o_glob,
+             precrc_h218o_glob, precrl_h218o_glob, precsc_h218o_glob, precsl_h218o_glob]
     log.debug('working precip d18O files in globs {}'.format(globs))
 
     matched_files = []

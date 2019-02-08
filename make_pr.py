@@ -24,7 +24,7 @@ log = logging.getLogger(__name__)
 def parse_icesm(precc_glob, precl_glob, precsc_glob, precsl_glob, pr_str, outfl=None):
     """Parse CAM PREC* iCESM netCDF files and write to outfl.
     """
-    globs = list(precc_glob, precl_glob, precsc_glob, precsl_glob)
+    globs = [precc_glob, precl_glob, precsc_glob, precsl_glob]
     log.debug('working precip files in glob {}'.format(globs))
 
     matched_files = []

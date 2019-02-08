@@ -31,8 +31,8 @@ def parse_icesm(precrc_h2o_glob, precrl_h2o_glob, precsc_h2o_glob, precsl_h2o_gl
     """
     ptiny = 1e-18
 
-    globs = list(precrc_h2o_glob, precrl_h2o_glob, precsc_h2o_glob, precsl_h2o_glob,
-                 precrc_hdo_glob, precrl_hdo_glob, precsc_hdo_glob, precsl_hdo_glob)
+    globs = [precrc_h2o_glob, precrl_h2o_glob, precsc_h2o_glob, precsl_h2o_glob,
+             precrc_hdo_glob, precrl_hdo_glob, precsc_hdo_glob, precsl_hdo_glob]
     log.debug('working precip deuterium files in globs {}'.format(globs))
 
     matched_files = []
