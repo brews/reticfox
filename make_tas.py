@@ -2,8 +2,8 @@
 # Can run from Bash with:
 #
 # python make_tas.py \
-#   --ts_glob /xdisk/malevich/b.e12.B1850C5.f19_g16.i21ka.03/*.TREFHT.*.nc \
-#   --ts_str tas \
+#   --trefht_glob /xdisk/malevich/b.e12.B1850C5.f19_g16.i21ka.03/*.TREFHT.*.nc \
+#   --tas_str tas \
 #   --outfl /rsgrps/jesst/icesm/b.e12.B1850C5.f19_g16.i21ka.03.cam.h0.tas.nc
 #
 # See help with `python make_tas.py --help`.
