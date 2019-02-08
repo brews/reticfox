@@ -47,7 +47,6 @@
 ### Load required modules/libraries if needed (blas example)
 ### Use "module avail" command to list all available modules
 ### NOTE: /usr/share/Modules/init/csh -CAPITAL M in Modules
-#source /usr/share/Modules/init/csh
 
 conda activate icesm_parse
 
