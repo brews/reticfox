@@ -72,7 +72,7 @@ if __name__ == '__main__':
                             filename=args.log[0],
                             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
-    parse_icesm(omega_glob=str(args.omega[0]),
+    parse_icesm(omega_glob=str(args.omega_glob[0]),
                 ps_glob=str(args.ps_glob[0]),
                 omega_str=str(args.omega_str[0]),
                 outfl=str(args.outfl[0]))
