@@ -114,8 +114,8 @@ python make_tempga_sst_sss.py \
     --tempga_str "tempga" \
     --tos_str "tos" \
     --sos_str "sos" \
-    --tempga_outfl "$OUT_DIR/$CASENAME.pop.h.tempga.nc"
-    --tos_outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc"
+    --tempga_outfl "$OUT_DIR/$CASENAME.pop.h.tempga.nc" \
+    --tos_outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc" \
     --sos_outfl "$OUT_DIR/$CASENAME.pop.h.sos.nc"
 
 python make_d18osw.py \
