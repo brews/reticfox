@@ -70,7 +70,7 @@ python make_tas.py \
     --outfl "$OUT_DIR/$CASENAME.cam.h0.tas.nc"
 
 python make_pr.py \
-    --precc_glob "$IN_DIR/*.PRECC.*.nc " \
+    --precc_glob "$IN_DIR/*.PRECC.*.nc" \
     --precl_glob "$IN_DIR/*.PRECL.*.nc" \
     --precsc_glob "$IN_DIR/*.PRECSC.*.nc" \
     --precsl_glob "$IN_DIR/*.PRECSL.*.nc" \
