@@ -149,11 +149,11 @@ if __name__ == '__main__':
                         default=['sos'],
                         help='variable name in output NetCDF file')
 
-    parser.add_argument('--outfl_tempga', metavar='OUTFLTEMPGA', nargs=1,
+    parser.add_argument('--tempga_outfl', metavar='OUTFLTEMPGA', nargs=1,
                         help='path for output NetCDF file')
-    parser.add_argument('--outfl_tos', metavar='OUTFLTOS', nargs=1,
+    parser.add_argument('--tos_outfl', metavar='OUTFLTOS', nargs=1,
                         help='path for output NetCDF file')
-    parser.add_argument('--outfl_sos', metavar='OUTFLSOS', nargs=1,
+    parser.add_argument('--sos_outfl', metavar='OUTFLSOS', nargs=1,
                         help='path for output NetCDF file')
 
     parser.add_argument('--log', metavar='LOGPATH', nargs=1, default=[None],
