@@ -19,6 +19,7 @@ import argparse
 import numpy as np
 import scipy.stats as stats
 import xarray as xr
+import dask.array
 import gsw
 
 
@@ -29,28 +30,14 @@ def pot2insitu_temp(theta, salt, insitu_temp_name='insitu_temp'):
     """Add 'insitu-temp' variable to potential temperature (theta) and salinity (salt) dataset
     """
     # Convert depth (cm) to (m) & positive up.
-    z_m = -theta.z_t.values * 0.01
-
     # sea pressure (dbar) from depth (m), note it needs latitude as input,
-    # unlike ferret and NCL functions.
-    latlon_shape = theta.TEMP.shape[-2:]
-    n_depth = len(theta.TEMP.z_t)
-    p = gsw.p_from_z(np.tile(z_m, (*latlon_shape[::-1], 1)).T,
-                     np.tile(theta.TLAT, (n_depth, 1, 1)))
+    p = xr.apply_ufunc(gsw.p_from_z, *xr.broadcast(-theta.z_t * 0.01, theta.TLAT), dask='parallelized', output_dtypes=[float])                                                        
 
-    # Using nan mask and broadcasting to work around missing values.
-    # I think this will be more memory efficient than proper masked arrays.
-    isnan_msk = np.isnan(salt.SALT)
-    t_insitu = np.empty(theta.TEMP.shape)
-    t_insitu[~isnan_msk] = gsw.pt_from_t(salt.SALT.values[~isnan_msk],
-                                         theta.TEMP.values[~isnan_msk], np.array([
-                                                                                 0]),
-                                         np.broadcast_to(p, salt.SALT.shape)[~isnan_msk])
-    t_insitu[isnan_msk] = np.nan
+    p_saltshape = dask.array.broadcast_to(p, salt.SALT.shape)
+    t_insitu = xr.apply_ufunc(gsw.pt_from_t, salt.SALT, theta.TEMP, np.array([0]), p_saltshape, dask='parallelized', output_dtypes=[float])
 
     # Assign back to xarray dataset with some metadata attribs.
-    theta[insitu_temp_name] = (theta.TEMP.dims, t_insitu)
-    # theta['t_insitu'] = (theta.TEMP.dims, np.empty(theta.TEMP.shape))
+    theta[insitu_temp_name] = t_insitu
     # Add attribute to set long_name and units.
     theta[insitu_temp_name].attrs['units'] = 'degC'
     theta[insitu_temp_name].attrs['long_name'] = 'Sea Temperature (In-situ Temperature)'
