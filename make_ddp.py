@@ -47,7 +47,7 @@ def parse_icesm(precrc_h2o_glob, precrl_h2o_glob, precsc_h2o_glob, precsl_h2o_gl
         hxo.PRECSC_H2Os + hxo.PRECSL_H2OS
     hxo['phdo'] = hxo.PRECRC_HDOr + hxo.PRECRL_HDOR + \
         hxo.PRECSC_HDOs + hxo.PRECSL_HDOS
-    hxo['ph2o'] = xr.where(hxo['ph2o'] < ptiny, hxo['ph2o'], ptiny)
+    hxo['ph2o'] = xr.where(hxo['ph2o'] > ptiny, hxo['ph2o'], ptiny)
     hxo[ddp_str] = (hxo['phdo'] / hxo['ph2o'] - 1.0) * 1000.0
 
     # Metadata

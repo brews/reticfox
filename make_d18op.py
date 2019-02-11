@@ -47,7 +47,7 @@ def parse_icesm(precrc_h216o_glob, precrl_h216o_glob, precsc_h216o_glob, precsl_
         h21xo.PRECSC_H218Os + h21xo.PRECSL_H218OS
     h21xo['p16o'] = h21xo.PRECRC_H216Or + h21xo.PRECRL_H216OR + \
         h21xo.PRECSC_H216Os + h21xo.PRECSL_H216OS
-    h21xo['p16o'] = xr.where(h21xo['p16o'] < ptiny, h21xo['p16o'], ptiny)
+    h21xo['p16o'] = xr.where(h21xo['p16o'] > ptiny, h21xo['p16o'], ptiny)
     h21xo[d18op_str] = (h21xo['p18o'] / h21xo['p16o'] - 1.0) * 1000.0
 
     # Metadata
