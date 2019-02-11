@@ -44,7 +44,7 @@ def parse_icesm(precc_glob, precl_glob, precsc_glob, precsl_glob, pr_str, outfl=
     out = pre[[pr_str, 'time_bnds']]
     if outfl is not None:
         log.debug('Writing variable {} to {}'.format(pr_str, outfl))
-        out.to_netcdf(outfl)
+        out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
     return out
 
 

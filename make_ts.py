@@ -27,12 +27,13 @@ def parse_icesm(ts_glob, ts_str, outfl=None):
     out = x[[ts_str, 'time_bnds']]
     if outfl is not None:
         log.debug('Writing variable {} to {}'.format(ts_str, outfl))
-        out.to_netcdf(outfl)
+        out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
     return out
-    
+
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Parse CAM TS from iCESM output')
+    parser = argparse.ArgumentParser(
+        description='Parse CAM TS from iCESM output')
     parser.add_argument('--ts_glob', metavar='TSGLOB', nargs=1,
                         help='glob pattern to input CAM TS NetCDF files')
     parser.add_argument('--ts_str', metavar='TSSTR', nargs=1,

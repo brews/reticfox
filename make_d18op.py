@@ -58,7 +58,7 @@ def parse_icesm(precrc_h216o_glob, precrl_h216o_glob, precsc_h216o_glob, precsl_
     if outfl is not None:
         # Dump to file
         log.debug('Writing variable {} to {}'.format(d18op_str, outfl))
-        out.to_netcdf(outfl)
+        out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
     return out
 
 

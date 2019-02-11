@@ -58,7 +58,7 @@ def parse_icesm(precrc_h2o_glob, precrl_h2o_glob, precsc_h2o_glob, precsl_h2o_gl
     if outfl is not None:
         # Dump to file
         log.debug('Writing variable {} to {}'.format(ddp_str, outfl))
-        out.to_netcdf(outfl)
+        out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
     return out
 
 

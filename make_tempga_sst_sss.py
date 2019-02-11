@@ -31,10 +31,12 @@ def pot2insitu_temp(theta, salt, insitu_temp_name='insitu_temp'):
     """
     # Convert depth (cm) to (m) & positive up.
     # sea pressure (dbar) from depth (m), note it needs latitude as input,
-    p = xr.apply_ufunc(gsw.p_from_z, *xr.broadcast(-theta.z_t * 0.01, theta.TLAT), dask='parallelized', output_dtypes=[float])                                                        
+    p = xr.apply_ufunc(gsw.p_from_z, *xr.broadcast(-theta.z_t *
+                                                   0.01, theta.TLAT), dask='parallelized', output_dtypes=[float])
 
     p_saltshape = dask.array.broadcast_to(p, salt.SALT.shape)
-    t_insitu = xr.apply_ufunc(gsw.pt_from_t, salt.SALT, theta.TEMP, np.array([0]), p_saltshape, dask='parallelized', output_dtypes=[float])
+    t_insitu = xr.apply_ufunc(gsw.pt_from_t, salt.SALT, theta.TEMP, np.array(
+        [0]), p_saltshape, dask='parallelized', output_dtypes=[float])
 
     # Assign back to xarray dataset with some metadata attribs.
     theta[insitu_temp_name] = t_insitu
@@ -108,14 +110,17 @@ def parse_icesm(temp_glob, salt_glob, tempga_str, tos_str, sos_str, tempga_outfl
     theta[tempga_str].attrs['long_name'] = 'Sea Temperature (Gamma-average)'
 
     # Write ~SST file
-    theta[[tos_str, 'time_bnds']].isel(z_t=0).to_netcdf(tos_outfl)
+    theta[[tos_str, 'time_bnds']].isel(z_t=0).to_netcdf(
+        tos_outfl, format='NETCDF4', engine='netcdf4')
 
     # Write gamma-average file
-    theta[[tempga_str, 'time_bnds']].to_netcdf(tempga_outfl)
+    theta[[tempga_str, 'time_bnds']].to_netcdf(
+        tempga_outfl, format='NETCDF4', engine='netcdf4')
 
     # Write ~SSS file
     salt[sos_str] = salt['SALT'].isel(z_t=0)
-    salt[[sos_str, 'time_bnds']].to_netcdf(sos_outfl)
+    salt[[sos_str, 'time_bnds']].to_netcdf(
+        sos_outfl, format='NETCDF4', engine='netcdf4')
 
 
 if __name__ == '__main__':

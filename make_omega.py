@@ -47,7 +47,7 @@ def parse_icesm(omega_glob, ps_glob, omega_str, outfl=None, levels=None):
     if outfl is not None:
         # Dump to file
         log.debug('Writing variable {} to {}'.format(omega_str, outfl))
-        out.to_netcdf(outfl)
+        out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
     return out
 
 
