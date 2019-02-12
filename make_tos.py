@@ -68,14 +68,11 @@ if __name__ == '__main__':
                         help='glob pattern to input POP TEMP NetCDF files')
     parser.add_argument('--salt_glob', metavar='SALTGLOB', nargs=1,
                         help='glob pattern to input POP SALT NetCDF files')
-
     parser.add_argument('--tos_str', metavar='TOSSTR', nargs=1,
                         default=['tos'],
                         help='variable name in output NetCDF file')
-
-    parser.add_argument('--outfl', metavar='OUTFLTOS', nargs=1,
+    parser.add_argument('--outfl', metavar='OUTFL', nargs=1,
                         help='path for output NetCDF file')
-
     parser.add_argument('--log', metavar='LOGPATH', nargs=1, default=[None],
                         help='optional path to write log file to')
     args = parser.parse_args()

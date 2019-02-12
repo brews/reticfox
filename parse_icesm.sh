@@ -124,14 +124,10 @@ python make_d18osw.py \
     --d18osw_str "d18osw" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.d18osw.nc"
 
-python make_tempga_sst_sss.py \
-    --temp_glob "$IN_DIR/*.TEMP.*.nc" \
-    --salt_glob "$IN_DIR/*.SALT.*.nc" \
-    --tempga_str "tempga" \
-    --tos_str "tos" \
-    --sos_str "sos" \
-    --tempga_outfl "$OUT_DIR/$CASENAME.pop.h.tempga.nc" \
-    --tos_outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc" \
-    --sos_outfl "$OUT_DIR/$CASENAME.pop.h.sos.nc"
+python make_toga.py \
+  --temp_glob "$IN_DIR/*.TEMP.*.nc" \
+  --salt_glob "$IN_DIR/*.SALT.*.nc" \
+  --toga_str "toGA" \
+  --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc"
 
 date

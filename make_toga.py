@@ -1,15 +1,11 @@
 # Parse TEMP and SALT from iCESM cam experiment slice NetCDF files.
 # Can run from Bash with:
 #
-# python make_tempga_sst_sss.py \
+# python make_toga.py \
 #   --temp_glob /xdisk/malevich/b.e12.B1850C5.f19_g16.i21ka.03/*.TEMP.*.nc \
 #   --salt_glob /xdisk/malevich/b.e12.B1850C5.f19_g16.i21ka.03/*.SALT.*.nc \
-#   --tempga_str tempga \
-#   --tos_str tos \
-#   --sos_str sos \
-#   --tempga_outfl /rsgrps/jesst/icesm/b.e12.B1850C5.f19_g16.i21ka.03.pop.h.tempga.nc
-#   --tos_outfl /rsgrps/jesst/icesm/b.e12.B1850C5.f19_g16.i21ka.03.pop.h.tos.nc
-#   --sos_outfl /rsgrps/jesst/icesm/b.e12.B1850C5.f19_g16.i21ka.03.pop.h.sos.nc
+#   --toga_str toga \
+#   --outfl /rsgrps/jesst/icesm/b.e12.B1850C5.f19_g16.i21ka.03.pop.h.toga.nc
 #
 # See help with `python make_tempga_sst_sss.py --help`.
 
@@ -82,11 +78,12 @@ def tex86_gammaavg_depth(ds, target_var='TEMP'):
     return temp_gamma_avg
 
 
-def parse_icesm(temp_glob, salt_glob, tempga_str, tos_str, sos_str, tempga_outfl, tos_outfl, sos_outfl):
-    """Parse POP TEMP and SALT iCESM NetCDF files
+def parse_icesm(temp_glob, salt_glob, toga_str, outfl):
+    """Parse POP TEMP and SALT iCESM NetCDF files for gamma-average insitu temp
     """
     log.debug('working temp files in glob {}'.format(temp_glob))
     log.debug('working salt files in glob {}'.format(salt_glob))
+    tos_str = 'insitu_temp'
 
     cutoff_z = 25000
 
@@ -94,7 +91,6 @@ def parse_icesm(temp_glob, salt_glob, tempga_str, tos_str, sos_str, tempga_outfl
         z_t=slice(0, cutoff_z)).sortby('time')
     salt = xr.open_mfdataset(salt_glob).sel(
         z_t=slice(0, cutoff_z)).sortby('time')
-
     # Because using z_t slice doesn't get z_w which has depth layers' bounds.
     theta = theta.sel(z_w_bot=slice(0, cutoff_z))
     theta = theta.isel(z_w=slice(0, len(theta.z_w_bot)))
@@ -104,50 +100,30 @@ def parse_icesm(temp_glob, salt_glob, tempga_str, tos_str, sos_str, tempga_outfl
     theta = pot2insitu_temp(theta, salt, insitu_temp_name=tos_str)
     # get gamma average, add to theta
     ga = tex86_gammaavg_depth(theta, target_var=tos_str)
-    ga.name = tempga_str
-    theta[tempga_str] = ga
-    theta[tempga_str].attrs['units'] = 'degC'
-    theta[tempga_str].attrs['long_name'] = 'Sea Temperature (Gamma-average)'
+    ga.name = toga_str
+    theta[toga_str] = ga
+    theta[toga_str].attrs['units'] = 'degC'
+    theta[toga_str].attrs['long_name'] = 'Sea Temperature (Gamma-average)'
 
-    # Write ~SST file
-    theta[[tos_str, 'time_bound']].isel(z_t=0).to_netcdf(
-        tos_outfl, format='NETCDF4', engine='netcdf4')
-
-    # Write gamma-average file
-    theta[[tempga_str, 'time_bound']].to_netcdf(
-        tempga_outfl, format='NETCDF4', engine='netcdf4')
-
-    # Write ~SSS file
-    salt[sos_str] = salt['SALT'].isel(z_t=0)
-    salt[[sos_str, 'time_bound']].to_netcdf(
-        sos_outfl, format='NETCDF4', engine='netcdf4')
+    out = theta[[toga_str, 'time_bound']]
+    if outfl is not None:
+        # Write gamma-average file
+        out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
+    return out
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Parse POP TEMP, SALT from iCESM output')
+        description='Parse POP TEMP, SALT from iCESM output for gamma-avg temp')
     parser.add_argument('--temp_glob', metavar='TEMPGLOB', nargs=1,
                         help='glob pattern to input POP TEMP NetCDF files')
     parser.add_argument('--salt_glob', metavar='SALTGLOB', nargs=1,
                         help='glob pattern to input POP SALT NetCDF files')
-
-    parser.add_argument('--tempga_str', metavar='TEMPGASTR', nargs=1,
-                        default=['tempga'],
+    parser.add_argument('--toga_str', metavar='TOGASTR', nargs=1,
+                        default=['toga'],
                         help='variable name in output NetCDF file')
-    parser.add_argument('--tos_str', metavar='TOSSTR', nargs=1,
-                        default=['tos'],
-                        help='variable name in output NetCDF file')
-    parser.add_argument('--sos_str', metavar='SOSSTR', nargs=1,
-                        default=['sos'],
-                        help='variable name in output NetCDF file')
-
-    parser.add_argument('--tempga_outfl', metavar='OUTFLTEMPGA', nargs=1,
+    parser.add_argument('--outfl', metavar='OUTFL', nargs=1,
                         help='path for output NetCDF file')
-    parser.add_argument('--tos_outfl', metavar='OUTFLTOS', nargs=1,
-                        help='path for output NetCDF file')
-    parser.add_argument('--sos_outfl', metavar='OUTFLSOS', nargs=1,
-                        help='path for output NetCDF file')
-
     parser.add_argument('--log', metavar='LOGPATH', nargs=1, default=[None],
                         help='optional path to write log file to')
     args = parser.parse_args()
@@ -159,9 +135,5 @@ if __name__ == '__main__':
 
     parse_icesm(temp_glob=str(args.temp_glob[0]),
                 salt_glob=str(args.salt_glob[0]),
-                tempga_str=str(args.tempga_str[0]),
-                tos_str=str(args.tos_str[0]),
-                sos_str=str(args.sos_str[0]),
-                tempga_outfl=str(args.tempga_outfl[0]),
-                tos_outfl=str(args.tos_outfl[0]),
-                sos_outfl=str(args.sos_outfl[0]))
+                toga_str=str(args.toga_str[0]),
+                outfl=str(args.outfl[0]))
