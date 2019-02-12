@@ -170,8 +170,6 @@ if __name__ == '__main__':
 
     atm_variables = ['PRECC',
                      'PRECL',
-                     'PRECSC',
-                     'PRECSL',
                      'TS',
                      'TREFHT',
                      'PRECRC_H218Or',
