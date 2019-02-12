@@ -2,52 +2,19 @@
 # Parse iCESM POP and CAM files.
 # Be sure you've run `conda activate icesm_parse` before running this script.
 
-### script to run a serial job using one core on htc using queue windfall or standard
-
-### beginning of line, three pound/cross-hatch characters indicate comment
-### beginning of line #PBS indicates an active PBS command/directive
-### use ###PBS and #PBS to deactivate and activate (respectively PBS lines without removing them from script
-
-### Refer to UA Batch System website for system and queue specific limits (max values)
-### Minimize resource requests (ncpus, mem, walltime, cputime, etc) to minimize queue wait delays
-
-### Set the job name
 #PBS -N icesm_parser
-
-### Request email when job begins and ends
 #PBS -m bea
-
-### Specify email address to use for notification.
 #PBS -M malevich@email.arizona.edu
-
-### Specify the PI group for this job
-### List of PI groups available to each user can be found with "va" command
 #PBS -W group_list=jesst
-
-### Set the queue for this job as windfall or standard (adjust ### and #)
 #PBS -q standard
-####PBS -q windfall
-
-### Set the number of cores (cpus) and memory that will be used for this job
-### When specifying memory request slightly less than 2GB memory per ncpus for standard node
-### Some memory needs to be reserved for the Linux system processes
 #PBS -l select=1:ncpus=6:mem=252gb:pcmem=42gb
-
-### Important!!! Include this line for your 1p job.
-### Without it, the entire node, containing 12 core, will be allocated
+### Consider using `pvmem` if have mem problems ^
 #PBS -l place=pack:shared
-
-### Specify "wallclock time" required for this job, hhh:mm:ss
 #PBS -l walltime=12:00:00
-
-### Specify total cpu time required for this job, hhh:mm:ss
-### total cputime = walltime * ncpus
+### total cputime = walltime * ncpus:
 #PBS -l cput=72:00:00
 
-### Load required modules/libraries if needed (blas example)
-### Use "module avail" command to list all available modules
-### NOTE: /usr/share/Modules/init/csh -CAPITAL M in Modules
-
+source ~/miniconda3/etc/profile.d/conda.sh
 conda activate icesm_parse
 
 CASENAME="b.e12.B1850C5.f19_g16.i21ka.03"
