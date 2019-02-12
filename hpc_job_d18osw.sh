@@ -46,7 +46,8 @@
 ### NOTE: /usr/share/Modules/init/csh -CAPITAL M in Modules
 #source /usr/share/Modules/init/csh
 
-source activate base
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate icesm_parse
 
 ### set directory for job execution, ~netid = home directory path
 cd /xdisk/malevich/b.e12.B1850C5.f19_g16.i21ka.03/
