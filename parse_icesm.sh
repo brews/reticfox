@@ -108,6 +108,22 @@ python make_ddp.py \
     --outfl "$OUT_DIR/$CASENAME.cam.h0.ddp.nc"
 
 # pop output
+python make_tos.py \
+  --temp_glob "$IN_DIR/*.TEMP.*.nc" \
+  --salt_glob "$IN_DIR/*.SALT.*.nc" \
+  --tos_str "tos" \
+  --outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc"
+
+python make_sos.py \
+  --salt_glob "$IN_DIR/*.SALT.*.nc" \
+  --sos_str "sos" \
+  --outfl "$OUT_DIR/$CASENAME.pop.h.sos.nc"
+
+python make_d18osw.py \
+    --r18o_glob "$IN_DIR/*.R18O.*.nc" \
+    --d18osw_str "d18osw" \
+    --outfl "$OUT_DIR/$CASENAME.pop.h.d18osw.nc"
+
 python make_tempga_sst_sss.py \
     --temp_glob "$IN_DIR/*.TEMP.*.nc" \
     --salt_glob "$IN_DIR/*.SALT.*.nc" \
@@ -117,10 +133,5 @@ python make_tempga_sst_sss.py \
     --tempga_outfl "$OUT_DIR/$CASENAME.pop.h.tempga.nc" \
     --tos_outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc" \
     --sos_outfl "$OUT_DIR/$CASENAME.pop.h.sos.nc"
-
-python make_d18osw.py \
-    --r18o_glob "$IN_DIR/*.R18O.*.nc" \
-    --d18osw_str "d18osw" \
-    --outfl "$OUT_DIR/$CASENAME.pop.h.d18osw.nc"
 
 date
