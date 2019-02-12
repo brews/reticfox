@@ -110,16 +110,16 @@ def parse_icesm(temp_glob, salt_glob, tempga_str, tos_str, sos_str, tempga_outfl
     theta[tempga_str].attrs['long_name'] = 'Sea Temperature (Gamma-average)'
 
     # Write ~SST file
-    theta[[tos_str, 'time_bnds']].isel(z_t=0).to_netcdf(
+    theta[[tos_str, 'time_bound']].isel(z_t=0).to_netcdf(
         tos_outfl, format='NETCDF4', engine='netcdf4')
 
     # Write gamma-average file
-    theta[[tempga_str, 'time_bnds']].to_netcdf(
+    theta[[tempga_str, 'time_bound']].to_netcdf(
         tempga_outfl, format='NETCDF4', engine='netcdf4')
 
     # Write ~SSS file
     salt[sos_str] = salt['SALT'].isel(z_t=0)
-    salt[[sos_str, 'time_bnds']].to_netcdf(
+    salt[[sos_str, 'time_bound']].to_netcdf(
         sos_outfl, format='NETCDF4', engine='netcdf4')
 
 

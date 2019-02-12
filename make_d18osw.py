@@ -28,7 +28,7 @@ def parse_icesm(r18o_glob, d18osw_str, outfl=None):
     r18o[d18osw_str].attrs['long_name'] = 'seawater d18O'
     r18o[d18osw_str].attrs['units'] = 'permil'
 
-    out = r18o[[d18osw_str, 'time_bnds']]
+    out = r18o[[d18osw_str, 'time_bound']]
     if outfl is not None:
         # Dump to file
         log.debug('Writing variable {} to {}'.format(d18osw_str, outfl))
