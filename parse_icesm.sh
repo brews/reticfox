@@ -109,15 +109,15 @@ python make_ddp.py \
 
 # pop output
 python make_tos.py \
-  --temp_glob "$IN_DIR/*.TEMP.*.nc" \
-  --salt_glob "$IN_DIR/*.SALT.*.nc" \
-  --tos_str "tos" \
-  --outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc"
+    --temp_glob "$IN_DIR/*.TEMP.*.nc" \
+    --salt_glob "$IN_DIR/*.SALT.*.nc" \
+    --tos_str "tos" \
+    --outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc"
 
 python make_sos.py \
-  --salt_glob "$IN_DIR/*.SALT.*.nc" \
-  --sos_str "sos" \
-  --outfl "$OUT_DIR/$CASENAME.pop.h.sos.nc"
+    --salt_glob "$IN_DIR/*.SALT.*.nc" \
+    --sos_str "sos" \
+    --outfl "$OUT_DIR/$CASENAME.pop.h.sos.nc"
 
 python make_d18osw.py \
     --r18o_glob "$IN_DIR/*.R18O.*.nc" \
@@ -125,9 +125,9 @@ python make_d18osw.py \
     --outfl "$OUT_DIR/$CASENAME.pop.h.d18osw.nc"
 
 python make_toga.py \
-  --temp_glob "$IN_DIR/*.TEMP.*.nc" \
-  --salt_glob "$IN_DIR/*.SALT.*.nc" \
-  --toga_str "toGA" \
-  --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc"
+    --temp_glob "$IN_DIR/*.TEMP.*.nc" \
+    --salt_glob "$IN_DIR/*.SALT.*.nc" \
+    --toga_str "toGA" \
+    --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc"
 
 date
