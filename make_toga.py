@@ -106,7 +106,7 @@ def parse_icesm(temp_glob, salt_glob, toga_str, outfl):
     theta[toga_str].attrs['long_name'] = 'Sea Temperature (Gamma-average)'
 
     out = theta[[toga_str, 'time_bound']]
-    out[toga_str] = out[toga_str].astype('float')
+    out[toga_str] = out[toga_str].astype('float32')
     if outfl is not None:
         # Write gamma-average file
         out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')

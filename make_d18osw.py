@@ -25,7 +25,7 @@ def parse_icesm(r18o_glob, d18osw_str, outfl=None):
     r18o[d18osw_str] = (r18o['R18O'] - 1.0) * 1000.0
 
     # Metadata
-    r18o[d18osw_str] = r18o[d18osw_str].astype('float')
+    r18o[d18osw_str] = r18o[d18osw_str].astype('float32')
     r18o[d18osw_str].attrs['long_name'] = 'seawater d18O'
     r18o[d18osw_str].attrs['units'] = 'permil'
 
