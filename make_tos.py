@@ -55,6 +55,7 @@ def parse_icesm(temp_glob, salt_glob, tos_str, outfl=None):
     theta = pot2insitu_temp(theta, salt, insitu_temp_name=tos_str)
 
     out = theta[[tos_str, 'time_bound']]
+    out[tos_str] = out[tos_str].astype('float')
     if outfl is not None:
         # Write ~SST file
         out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')

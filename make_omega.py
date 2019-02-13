@@ -44,6 +44,7 @@ def parse_icesm(omega_glob, ps_glob, omega_str, outfl=None, levels=None):
     omega[omega_str].attrs['long_name'] = 'Vertical velocity (pressure)'
 
     out = omega[[omega_str, 'time_bnds']]
+    out[omega_str] = out[omega_str].astype('float')
     if outfl is not None:
         # Dump to file
         log.debug('Writing variable {} to {}'.format(omega_str, outfl))
