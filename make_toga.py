@@ -21,7 +21,6 @@ import gsw
 log = logging.getLogger(__name__)
 
 
-
 def pot2insitu_temp(theta, salt, insitu_temp_name='insitu_temp'):
     """Add 'insitu-temp' variable to potential temperature (theta) and salinity (salt) dataset
     """
