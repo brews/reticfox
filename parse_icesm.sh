@@ -85,16 +85,33 @@ python make_d18osw.py \
     --d18osw_str "d18osw" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.d18osw.nc"
 
-python make_tos.py \
-    --temp_glob "$IN_DIR/*.TEMP.*.nc" \
-    --salt_glob "$IN_DIR/*.SALT.*.nc" \
-    --tos_str "tos" \
-    --outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc"
+# Now we're doing gamma-average T and SST slice-by-slice to avoid memory problems
+# from calculating in-situ temperatures.
+slice_names=( "000101-009912" "010001-019912" "020001-029912" "030001-039912" "040001-049912" "050001-059912" "060001-069912" "070001-079912" "080001-090012")
+for i in "${slice_names[@]}"
+do
+    python make_tos.py \
+        --temp_glob "$IN_DIR/$CASENAME.pop.h.TEMP.$i.nc" \
+        --salt_glob "$IN_DIR/$CASENAME.pop.h.SALT.$i.nc" \
+        --tos_str "tos" \
+        --outfl "$IN_DIR/$CASENAME.pop.h.tos.$i.nc"
 
-python make_toga.py \
-    --temp_glob "$IN_DIR/*.TEMP.*.nc" \
-    --salt_glob "$IN_DIR/*.SALT.*.nc" \
-    --toga_str "toGA" \
-    --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc"
+    python make_toga.py \
+        --temp_glob "$IN_DIR/$CASENAME.pop.h.TEMP.$i.nc" \
+        --salt_glob "$IN_DIR/$CASENAME.pop.h.SALT.$i.nc" \
+        --toga_str "toGA" \
+        --outfl "$IN_DIR/$CASENAME.pop.h.toGA.$i.nc"
+done
+
+python combine_netcdf_glob.py \
+  --nc_glob "$IN_DIR/*.tos.*.nc" \
+  --sortby "time" \
+  --outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc"
+
+python combine_netcdf_glob.py \
+  --nc_glob "$IN_DIR/*.toGA.*.nc" \
+  --sortby "time" \
+  --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc"
+
 
 date
