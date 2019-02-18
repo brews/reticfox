@@ -78,7 +78,7 @@ def tex86_gammaavg_depth(ds, target_var='TEMP'):
     return temp_gamma_avg
 
 
-def parse_icesm(temp_glob, salt_glob, toga_str, outfl):
+def parse_icesm(temp_glob, salt_glob, toga_str, outfl=None):
     """Parse POP TEMP and SALT iCESM NetCDF files for gamma-average insitu temp
     """
     log.debug('working temp files in glob {}'.format(temp_glob))
