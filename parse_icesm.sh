@@ -2,17 +2,17 @@
 # Parse iCESM POP and CAM files.
 # Be sure you've run `conda activate icesm_parse` before running this script.
 
-#PBS -N icesm_parser
+#PBS -N parse_icesm
 #PBS -m bea
 #PBS -M malevich@email.arizona.edu
 #PBS -W group_list=jesst
 #PBS -q standard
-#PBS -l select=1:ncpus=6:mem=252gb:pcmem=42gb
+#PBS -l select=1:ncpus=28:mem=168gb
 ### Consider using `pvmem` if have mem problems ^
 #PBS -l place=pack:shared
-#PBS -l walltime=12:00:00
+#PBS -l walltime=24:00:00
 ### total cputime = walltime * ncpus:
-#PBS -l cput=72:00:00
+#PBS -l cput=672:00:00
 
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate icesm_parse
