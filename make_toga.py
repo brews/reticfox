@@ -85,14 +85,17 @@ def parse_icesm(temp_glob, salt_glob, toga_str, outfl):
     log.debug('working salt files in glob {}'.format(salt_glob))
     tos_str = 'insitu_temp'
 
-    cutoff_z = 25000
+    cutoff_z = 20000
 
     theta = xr.open_mfdataset(temp_glob).sel(
         z_t=slice(0, cutoff_z)).sortby('time')
     salt = xr.open_mfdataset(salt_glob).sel(
         z_t=slice(0, cutoff_z)).sortby('time')
     # Because using z_t slice doesn't get z_w which has depth layers' bounds.
+    # We trim by z_w_bot length because we don't want the bottom of the layer to 
+    # be deeper than `cutoff_z`.
     theta = theta.sel(z_w_bot=slice(0, cutoff_z))
+    theta = theta.isel(z_t=slice(0, len(theta.z_w_bot)))
     theta = theta.isel(z_w=slice(0, len(theta.z_w_bot)))
     theta = theta.isel(z_w_top=slice(0, len(theta.z_w_bot)))
 
