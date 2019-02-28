@@ -14,31 +14,10 @@ import logging
 import argparse
 import numpy as np
 import xarray as xr
-import dask.array
-import gsw
+from make_toga import pot2insitu_temp
 
 
 log = logging.getLogger(__name__)
-
-
-def pot2insitu_temp(theta, salt, insitu_temp_name='insitu_temp'):
-    """Add 'insitu-temp' variable to potential temperature (theta) and salinity (salt) dataset
-    """
-    # Convert depth (cm) to (m) & positive up.
-    # sea pressure (dbar) from depth (m), note it needs latitude as input,
-    p = xr.apply_ufunc(gsw.p_from_z, *xr.broadcast(-theta.z_t *
-                                                   0.01, theta.TLAT), dask='parallelized', output_dtypes=[float])
-
-    p_saltshape = dask.array.broadcast_to(p, salt.SALT.shape)
-    t_insitu = xr.apply_ufunc(gsw.pt_from_t, salt.SALT, theta.TEMP, np.array(
-        [0]), p_saltshape, dask='parallelized', output_dtypes=[float])
-
-    # Assign back to xarray dataset with some metadata attribs.
-    theta[insitu_temp_name] = t_insitu
-    # Add attribute to set long_name and units.
-    theta[insitu_temp_name].attrs['units'] = 'degC'
-    theta[insitu_temp_name].attrs['long_name'] = 'Sea Temperature (In-situ Temperature)'
-    return theta
 
 
 def parse_icesm(temp_glob, salt_glob, tos_str, outfl=None):
@@ -52,7 +31,7 @@ def parse_icesm(temp_glob, salt_glob, tos_str, outfl=None):
     salt = xr.open_mfdataset(salt_glob).sel(z_t=500.0).sortby('time')
 
     # First get in-situ temps from potential temps (TEMP), add to theta
-    theta = pot2insitu_temp(theta, salt, insitu_temp_name=tos_str)
+    theta[tos_str] = pot2insitu_temp(theta, salt, insitu_temp_name=tos_str)
 
     out = theta[[tos_str, 'time_bound']]
     out[tos_str] = out[tos_str].astype('float32')

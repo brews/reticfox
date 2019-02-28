@@ -22,34 +22,22 @@ log = logging.getLogger(__name__)
 
 
 def pot2insitu_temp(theta, salt, insitu_temp_name='insitu_temp'):
-    """Add 'insitu-temp' variable to potential temperature (theta) and salinity (salt) dataset
+    """Get insitu temp DataArray from potential temperature (theta) and salinity (salt) dataset
     """
     # Convert depth (cm) to (m) & positive up.
-    z_m = -theta.z_t.values * 0.01
     # sea pressure (dbar) from depth (m), note it needs latitude as input,
     # unlike ferret and NCL functions.
-    latlon_shape = theta.TEMP.shape[-2:]
-    n_depth = len(theta.TEMP.z_t)
-    p = gsw.p_from_z(np.tile(z_m, (*latlon_shape[::-1], 1)).T,
-                     np.tile(theta.TLAT, (n_depth, 1, 1)))
+    p = xr.apply_ufunc(gsw.p_from_z, -theta.z_t * 0.01, theta.TLAT,
+                       output_dtypes=['float32'], dask='parallelized')
 
-    # Using nan mask and broadcasting to work around missing values.
-    # I think this will be more memory efficient than proper masked arrays.
-    isnan_msk = np.isnan(salt.SALT)
-    t_insitu = np.empty(theta.TEMP.shape)
-    t_insitu[~isnan_msk] = gsw.pt_from_t(salt.SALT.values[~isnan_msk],
-                                         theta.TEMP.values[~isnan_msk], np.array([
-                                                                                 0]),
-                                         np.broadcast_to(p, salt.SALT.shape)[~isnan_msk])
-    t_insitu[isnan_msk] = np.nan
+    insitu_temp = xr.apply_ufunc(gsw.pt_from_t, salt.SALT, theta.TEMP, np.array([0]), p,
+                                 output_dtypes=['float32'], dask='parallelized')
 
-    # Assign back to xarray dataset with some metadata attribs.
-    theta[insitu_temp_name] = (theta.TEMP.dims, t_insitu)
-    # theta['t_insitu'] = (theta.TEMP.dims, np.empty(theta.TEMP.shape))
-    # Add attribute to set long_name and units.
-    theta[insitu_temp_name].attrs['units'] = 'degC'
-    theta[insitu_temp_name].attrs['long_name'] = 'Sea Temperature (In-situ Temperature)'
-    return theta
+    # Add metadata attributes.
+    insitu_temp.name = str(insitu_temp_name)
+    insitu_temp.attrs['units'] = 'degC'
+    insitu_temp.attrs['long_name'] = 'Sea Temperature (In-situ Temperature)'
+    return insitu_temp
 
 
 def tex86_gammaavg_depth(ds, target_var='TEMP'):
@@ -78,13 +66,13 @@ def tex86_gammaavg_depth(ds, target_var='TEMP'):
     # Normalize, careful to consider grid points with missing depth values:
     gamma_weights_norm = gamma_weights / \
         (ds[target_var].notnull() * gamma_weights).sum('z_t')
-    temp_gamma_avg = (ds[target_var] * gamma_weights_norm).sum(dim='z_t')
-    # Boom. `temp_gamma_avg` should be it. You can write to netcdf with
-    # `temp_gamma_avg.to_netcdf('filename.nc')`
+    temp_gamma_avg = (
+        ds[target_var] * gamma_weights_norm).sum(dim='z_t').astype('float32')
 
-    # Put nans where the top of the original dataarray had nans.
-    isnan_msk = ds[target_var].isel(z_t=0).isnull()
-    temp_gamma_avg.values[isnan_msk] = np.nan
+    # Add metadata attributes.
+    temp_gamma_avg.attrs['units'] = 'degC'
+    temp_gamma_avg.attrs['long_name'] = 'Sea Temperature (Gamma-average)'
+
     return temp_gamma_avg
 
 
@@ -102,21 +90,18 @@ def parse_icesm(temp_glob, salt_glob, toga_str, outfl=None):
     salt = xr.open_mfdataset(salt_glob).sel(
         z_t=slice(0, cutoff_z)).sortby('time')
     # Because using z_t slice doesn't get z_w which has depth layers' bounds.
-    # We trim by z_w_bot length because we don't want the bottom of the layer to 
+    # We trim by z_w_bot length because we don't want the bottom of the layer to
     # be deeper than `cutoff_z`.
     theta = theta.sel(z_w_bot=slice(0, cutoff_z))
     theta = theta.isel(z_t=slice(0, len(theta.z_w_bot)))
     theta = theta.isel(z_w=slice(0, len(theta.z_w_bot)))
     theta = theta.isel(z_w_top=slice(0, len(theta.z_w_bot)))
+    salt = salt.isel(z_t=slice(0, len(theta.z_t)))
 
     # First get in-situ temps from potential temps (TEMP), add to theta
-    theta = pot2insitu_temp(theta, salt, insitu_temp_name=tos_str)
+    theta[tos_str] = pot2insitu_temp(theta, salt, insitu_temp_name=tos_str)
     # get gamma average, add to theta
-    ga = tex86_gammaavg_depth(theta, target_var=tos_str)
-    ga.name = toga_str
-    theta[toga_str] = ga
-    theta[toga_str].attrs['units'] = 'degC'
-    theta[toga_str].attrs['long_name'] = 'Sea Temperature (Gamma-average)'
+    theta[toga_str] = tex86_gammaavg_depth(theta, target_var=tos_str)
 
     out = theta[[toga_str, 'time_bound']]
     out[toga_str] = out[toga_str].astype('float32')
