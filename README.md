@@ -1,4 +1,4 @@
-# potential-guide
+# reticfox
 Scripts to parse and move iCESM LGM slices for LGM Data Assimilation.
 
 # Installation
