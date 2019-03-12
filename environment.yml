@@ -12,5 +12,6 @@ dependencies:
   - python>=3.6
   - scipy
   - xarray
+  - click
   - pip:
     - globus-cli
