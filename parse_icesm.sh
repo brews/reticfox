@@ -76,40 +76,40 @@ reticfox make_ddp \
 reticfox make_sos \
     --salt_glob "$IN_DIR/*.SALT.*.nc" \
     --sos_str "sos" \
-    --outfl "$OUT_DIR/$CASENAME.pop.h.sos.nc"
+    --outfl "$OUT_DIR/$CASENAME.pop.h.sos.nc" \
+    --time_chunks 5
 
 reticfox make_d18osw \
     --r18o_glob "$IN_DIR/*.R18O.*.nc" \
     --d18osw_str "d18osw" \
-    --outfl "$OUT_DIR/$CASENAME.pop.h.d18osw.nc"
+    --outfl "$OUT_DIR/$CASENAME.pop.h.d18osw.nc" \
+    --time_chunks 5
 
 # Now we're doing gamma-average T and SST slice-by-slice to avoid memory problems
 # from calculating in-situ temperatures.
 slice_names=( "000101-009912" "010001-019912" "020001-029912" "030001-039912" "040001-049912" "050001-059912" "060001-069912" "070001-079912" "080001-090012")
 for i in "${slice_names[@]}"
 do
-    reticfox make_tos \
+    reticfox make_tinsitu \
         --temp_glob "$IN_DIR/$CASENAME.pop.h.TEMP.$i.nc" \
         --salt_glob "$IN_DIR/$CASENAME.pop.h.SALT.$i.nc" \
-        --tos_str "tos" \
-        --outfl "$IN_DIR/$CASENAME.pop.h.tos.$i.nc"
-
-    reticfox make_toga \
-        --temp_glob "$IN_DIR/$CASENAME.pop.h.TEMP.$i.nc" \
-        --salt_glob "$IN_DIR/$CASENAME.pop.h.SALT.$i.nc" \
-        --toga_str "toGA" \
-        --outfl "$IN_DIR/$CASENAME.pop.h.toGA.$i.nc"
+        --tinsitu_str "tinsitu" \
+        --outfl "$IN_DIR/$CASENAME.pop.h.tinsitu.$i.nc" \
+        --time_chunks 5
 done
 
-reticfox combine_netcdf_glob \
-  --nc_glob "$IN_DIR/*.tos.*.nc" \
-  --sortby "time" \
-  --outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc"
+reticfox make_tos \
+    --tinsitu_glob "$IN_DIR/*.tinsitu.*.nc" \
+    --tos_str "tos" \
+    --outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc" \
+    --tinsitu_str "tinsitu" \
+    --time_chunks 5
 
-reticfox combine_netcdf_glob \
-  --nc_glob "$IN_DIR/*.toGA.*.nc" \
-  --sortby "time" \
-  --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc"
-
+reticfox make_toga \
+    --tinsitu_glob "$IN_DIR/*.tinsitu.*.nc" \
+    --toga_str "toGA" \
+    --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc" \
+    --tinsitu_str "tinsitu" \
+    --time_chunks 5
 
 date

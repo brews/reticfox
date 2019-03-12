@@ -10,6 +10,8 @@ log = logging.getLogger(__name__)
 
 def pot2insitu_temp(theta, salt, insitu_temp_name='insitu_temp'):
     """Get insitu temp DataArray from potential temperature (theta) and salinity (salt) dataset
+
+    You may need to run ``.compute()`` on the output if dask-enabled and you want numbers.
     """
     # Convert depth (cm) to (m) & positive up.
     # sea pressure (dbar) from depth (m), note it needs latitude as input,
@@ -27,7 +29,7 @@ def pot2insitu_temp(theta, salt, insitu_temp_name='insitu_temp'):
     return insitu_temp
 
 
-def tex86_gammaavg_depth(ds, target_var='TEMP'):
+def tex86_gammaavg_depth(ds, target_var='TEMP', gatemp_name='toga'):
     """Return gamma-average DataArray of input temperature Dataset (ds)
     """
     gamma_a = 4.5
@@ -54,9 +56,10 @@ def tex86_gammaavg_depth(ds, target_var='TEMP'):
     gamma_weights_norm = gamma_weights / \
         (ds[target_var].notnull() * gamma_weights).sum('z_t')
     temp_gamma_avg = (
-        ds[target_var] * gamma_weights_norm).sum(dim='z_t').astype('float32')
+        ds[target_var] * gamma_weights_norm).sum(dim='z_t')
 
     # Add metadata attributes.
+    temp_gamma_avg.name = str(gatemp_name)
     temp_gamma_avg.attrs['units'] = 'degC'
     temp_gamma_avg.attrs['long_name'] = 'Sea Temperature (Gamma-average)'
 
