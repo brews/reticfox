@@ -282,7 +282,6 @@ def make_toga(tinsitu_glob, toga_str, outfl=None, tinsitu_str='tinsitu', time_ch
     # be deeper than `cutoff_z`.
     tinsitu = tinsitu.sel(z_w_bot=slice(0, cutoff_z))
     tinsitu = tinsitu.isel(z_t=slice(0, len(tinsitu['z_w_bot'])))
-    tinsitu = tinsitu.isel(z_w=slice(0, len(tinsitu['z_w_bot'])))
     tinsitu = tinsitu.isel(z_w_top=slice(0, len(tinsitu['z_w_bot'])))
 
     # get gamma average, add to tinsitu
