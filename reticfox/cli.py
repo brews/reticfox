@@ -226,14 +226,12 @@ def make_tos(tinsitu_glob, tos_str, outfl=None, tinsitu_str='tinsitu', time_chun
     """Parse POP TEMP iCESM NetCDF files
     """
     top_level = 500.0  # highest ocean level in iCESM (cm)
-
     # Note we're grabbing 500 cm depth - should be top-most ocean layer.
     tinsitu = (xr.open_mfdataset(tinsitu_glob, chunks={'time': time_chunks})
                .sel(z_t=top_level)
                .sortby('time'))
 
-    out = tinsitu[[tinsitu_str, 'time_bound']]
-    out[tos_str] = out[tos_str].astype('float32')
+    out = tinsitu[[tinsitu_str, 'time_bound']].rename({tinsitu_str: tos_str})
     if outfl is not None:
         # Write ~SST file
         out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
@@ -249,16 +247,13 @@ def make_sos(salt_glob, sos_str, outfl=None, time_chunks=5):
     """Parse POP SALT iCESM NetCDF files
     """
     top_level = 500.0  # highest ocean level in iCESM (cm)
-
     # Note we're grabbing 500 cm depth - should be top-most ocean layer.
     salt = (xr.open_mfdataset(salt_glob, chunks={'time': time_chunks})
             .sel(z_t=top_level)
             .sortby('time'))
 
-    salt[sos_str] = salt['SALT']
-    out = salt[[sos_str, 'time_bound']]
+    out = salt[[sos_str, 'time_bound']].rename({'SALT': sos_str})
     if outfl is not None:
-        # Write ~SSS file
         out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
     return out
 
