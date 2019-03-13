@@ -221,7 +221,7 @@ def make_ts(ts_glob, ts_str, outfl=None):
 @click.option('--tos_str', default='tos', help='Variable name in output NetCDF file.')
 @click.option('--outfl', help='Path for output NetCDF file.')
 @click.option('--tinsitu_str', default='tinsitu', help='Insitu-seatemp variable name in input NetCDF file.')
-@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk')
+@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk.')
 def make_tos(tinsitu_glob, tos_str, outfl=None, tinsitu_str='tinsitu', time_chunks=5):
     """Parse POP TEMP iCESM NetCDF files
     """
@@ -238,12 +238,13 @@ def make_tos(tinsitu_glob, tos_str, outfl=None, tinsitu_str='tinsitu', time_chun
     return out
 
 
-@reticfox_cli.command(help='Parse SALT from iCESM output')
+@reticfox_cli.command(help='Make surface salinity file from iCESM SALT')
 @click.option('--salt_glob', help='Glob pattern to input POP SALT NetCDF files.')
 @click.option('--sos_str', default='sos', help='Variable name in output NetCDF file.')
 @click.option('--outfl', help='Path for output NetCDF file.')
-@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk')
-def make_sos(salt_glob, sos_str, outfl=None, time_chunks=5):
+@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk.')
+@click.option('--mask_badsalt', is_flag=True, help='Mask-out negative SALT values with NAs?')
+def make_sos(salt_glob, sos_str, outfl=None, time_chunks=5, mask_badsalt=True):
     """Parse POP SALT iCESM NetCDF files
     """
     top_level = 500.0  # highest ocean level in iCESM (cm)
@@ -252,18 +253,21 @@ def make_sos(salt_glob, sos_str, outfl=None, time_chunks=5):
             .sel(z_t=top_level)
             .sortby('time'))
 
-    out = salt[[sos_str, 'time_bound']].rename({'SALT': sos_str})
+    if mask_badsalt:
+        salt['SALT'] = salt['SALT'].where(salt['SALT'] > 0)
+
+    out = salt[['SALT', 'time_bound']].rename({'SALT': sos_str})
     if outfl is not None:
         out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
     return out
 
 
-@reticfox_cli.command(help='Parse POP TEMP, SALT from iCESM output for gamma-avg temp')
+@reticfox_cli.command(help='Parse POP TEMP, SALT from iCESM output for TEX86 gamma-avg temp')
 @click.option('--tinsitu_glob', help='Glob pattern to input POP in-situ seatemp NetCDF files.')
 @click.option('--toga_str', default='toga', help='Variable name in output NetCDF file.')
 @click.option('--outfl', help='Path for output NetCDF file.')
 @click.option('--tinsitu_str', default='tinsitu', help='Insitu-seatemp variable name in input NetCDF file.')
-@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk')
+@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk.')
 def make_toga(tinsitu_glob, toga_str, outfl=None, tinsitu_str='tinsitu', time_chunks=5):
     """Parse POP TEMP and SALT iCESM NetCDF files for gamma-average insitu temp
     """
@@ -296,14 +300,18 @@ def make_toga(tinsitu_glob, toga_str, outfl=None, tinsitu_str='tinsitu', time_ch
 @click.option('--salt_glob', help='Glob pattern to input POP SALT NetCDF files.')
 @click.option('--tinsitu_str', default='tinsitu', help='Variable name in output NetCDF file.')
 @click.option('--outfl', help='Path for output NetCDF file.')
-@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk')
-def make_tinsitu(temp_glob, salt_glob, tinsitu_str, outfl=None, time_chunks=5):
+@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk.')
+@click.option('--mask_badsalt', is_flag=True, help='Mask-out negative SALT values with NAs?')
+def make_tinsitu(temp_glob, salt_glob, tinsitu_str, outfl=None, time_chunks=5, mask_badsalt=True):
     """Parse POP TEMP and SALT iCESM NetCDF files for insitu seatemps
     """
     theta = xr.open_mfdataset(
         temp_glob, chunks={'time': time_chunks}).sortby('time')
     salt = xr.open_mfdataset(
         salt_glob, chunks={'time': time_chunks}).sortby('time')
+
+    if mask_badsalt:
+        salt['SALT'] = salt['SALT'].where(salt['SALT'] > 0)
 
     # First get in-situ temps from potential temps (TEMP), add to theta
     theta[tinsitu_str] = api.pot2insitu_temp(
@@ -324,15 +332,26 @@ def make_tinsitu(temp_glob, salt_glob, tinsitu_str, outfl=None, time_chunks=5):
 @click.option('--r18o_glob', help='Glob pattern to input POP R18O NetCDF files.')
 @click.option('--d18osw_str', default='d18osw', help='Variable name in output NetCDF file.')
 @click.option('--outfl', help='Path for output NetCDF file.')
-@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk')
-def make_d18osw(r18o_glob, d18osw_str, outfl=None, time_chunks=5):
+@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk.')
+@click.option('--bad_sos_glob', default='NONE', help='Glob pattern to input surface NetCDF files, to mask subzero salinity.')
+@click.option('--sos_str', default='sos', help='Surface salinity variable name in `bad_sos_glob`s.')
+def make_d18osw(r18o_glob, d18osw_str, outfl=None, time_chunks=5, bad_sos_glob=None, sos_str='sos'):
     """Parse POP R18O iCESM netCDF files and write to outfl.
     """
+    if bad_sos_glob.lower() == 'none':
+        bad_sos_glob = None
+
     top_level = 500.0  # highest ocean level in iCESM (cm)
     r18o = (xr.open_mfdataset(r18o_glob, chunks={'time': time_chunks})
             .sel(z_t=top_level)
             .sortby('time'))
     r18o[d18osw_str] = (r18o['R18O'] - 1.0) * 1000.0
+
+    if bad_sos_glob is not None:
+        # Read in and mask out grid points with subzero seawater salinity.
+        sos = (xr.open_mfdataset(bad_sos_glob, chunks={'time': time_chunks})
+               .sortby('time'))
+        r18o[d18osw_str] = r18o[d18osw_str].where(sos[sos_str] > 0)
 
     # Metadata
     r18o[d18osw_str] = r18o[d18osw_str].astype('float32')

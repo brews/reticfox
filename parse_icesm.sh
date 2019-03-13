@@ -20,6 +20,7 @@ conda activate icesm_parse
 CASENAME="b.e12.B1850C5.f19_g16.i21ka.03"
 IN_DIR="/xdisk/malevich/$CASENAME"
 OUT_DIR="/rsgrps/jesst/icesm/$CASENAME"
+TIMECHUNKS=5
 
 date
 
@@ -77,13 +78,16 @@ reticfox make_sos \
     --salt_glob "$IN_DIR/*.SALT.*.nc" \
     --sos_str "sos" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.sos.nc" \
-    --time_chunks 5
+    --time_chunks $TIMECHUNKS \
+    --mask_badsalt
 
 reticfox make_d18osw \
     --r18o_glob "$IN_DIR/*.R18O.*.nc" \
     --d18osw_str "d18osw" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.d18osw.nc" \
-    --time_chunks 5
+    --time_chunks $TIMECHUNKS \
+    --bad_sos_glob "$OUT_DIR/$CASENAME.pop.h.sos.nc" \
+    --sos_str "sos"
 
 # Now we're doing gamma-average T and SST slice-by-slice to avoid memory problems
 # from calculating in-situ temperatures.
@@ -95,7 +99,8 @@ do
         --salt_glob "$IN_DIR/$CASENAME.pop.h.SALT.$i.nc" \
         --tinsitu_str "tinsitu" \
         --outfl "$IN_DIR/$CASENAME.pop.h.tinsitu.$i.nc" \
-        --time_chunks 5
+        --time_chunks $TIMECHUNKS \
+        --mask_badsalt
 done
 
 reticfox make_tos \
@@ -103,13 +108,13 @@ reticfox make_tos \
     --tos_str "tos" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc" \
     --tinsitu_str "tinsitu" \
-    --time_chunks 5
+    --time_chunks $TIMECHUNKS
 
 reticfox make_toga \
     --tinsitu_glob "$IN_DIR/*.tinsitu.*.nc" \
     --toga_str "toGA" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc" \
     --tinsitu_str "tinsitu" \
-    --time_chunks 5
+    --time_chunks $TIMECHUNKS
 
 date
