@@ -78,14 +78,14 @@ reticfox make_sos \
     --salt_glob "$IN_DIR/*.SALT.*.nc" \
     --sos_str "sos" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.sos.nc" \
-    --time_chunks $TIMECHUNKS \
+    --time_chunks "$TIMECHUNKS" \
     --mask_badsalt
 
 reticfox make_d18osw \
     --r18o_glob "$IN_DIR/*.R18O.*.nc" \
     --d18osw_str "d18osw" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.d18osw.nc" \
-    --time_chunks $TIMECHUNKS \
+    --time_chunks "$TIMECHUNKS" \
     --bad_sos_glob "$OUT_DIR/$CASENAME.pop.h.sos.nc" \
     --sos_str "sos"
 
@@ -99,7 +99,7 @@ do
         --salt_glob "$IN_DIR/$CASENAME.pop.h.SALT.$i.nc" \
         --tinsitu_str "tinsitu" \
         --outfl "$IN_DIR/$CASENAME.pop.h.tinsitu.$i.nc" \
-        --time_chunks $TIMECHUNKS \
+        --time_chunks "$TIMECHUNKS" \
         --mask_badsalt
 done
 
@@ -108,13 +108,13 @@ reticfox make_tos \
     --tos_str "tos" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc" \
     --tinsitu_str "tinsitu" \
-    --time_chunks $TIMECHUNKS
+    --time_chunks "$TIMECHUNKS"
 
 reticfox make_toga \
     --tinsitu_glob "$IN_DIR/*.tinsitu.*.nc" \
     --toga_str "toGA" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc" \
     --tinsitu_str "tinsitu" \
-    --time_chunks $TIMECHUNKS
+    --time_chunks "$TIMECHUNKS"
 
 date
