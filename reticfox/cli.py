@@ -305,10 +305,12 @@ def make_toga(tinsitu_glob, toga_str, outfl=None, tinsitu_str='tinsitu', time_ch
 def make_tinsitu(temp_glob, salt_glob, tinsitu_str, outfl=None, time_chunks=5, mask_badsalt=True):
     """Parse POP TEMP and SALT iCESM NetCDF files for insitu seatemps
     """
-    theta = xr.open_mfdataset(
-        temp_glob, chunks={'time': time_chunks}).sortby('time')
-    salt = xr.open_mfdataset(
-        salt_glob, chunks={'time': time_chunks}).sortby('time')
+    cutoff_z = 20000
+
+    theta = xr.open_mfdataset(temp_glob,  chunks={'time': time_chunks}).sel(
+        z_t=slice(0, cutoff_z)).sortby('time')
+    salt = xr.open_mfdataset(salt_glob, chunks={'time': time_chunks}).sel(
+        z_t=slice(0, cutoff_z)).sortby('time')
 
     if mask_badsalt:
         salt['SALT'] = salt['SALT'].where(salt['SALT'] > 0)
