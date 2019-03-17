@@ -217,21 +217,30 @@ def make_ts(ts_glob, ts_str, outfl=None):
 
 
 @reticfox_cli.command(help='Parse POP TEMP from iCESM output')
-@click.option('--tinsitu_glob', help='Glob pattern to input POP in-situ seatemp NetCDF files.')
+@click.option('--temp_glob', help='Glob pattern to input POP TEMP NetCDF files.')
+@click.option('--salt_glob', help='Glob pattern to input POP SALT NetCDF files.')
 @click.option('--tos_str', default='tos', help='Variable name in output NetCDF file.')
 @click.option('--outfl', help='Path for output NetCDF file.')
-@click.option('--tinsitu_str', default='tinsitu', help='Insitu-seatemp variable name in input NetCDF file.')
 @click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk.')
-def make_tos(tinsitu_glob, tos_str, outfl=None, tinsitu_str='tinsitu', time_chunks=5):
+@click.option('--mask_badsalt', is_flag=True, help='Mask-out negative SALT values with NAs?')
+def make_tos(temp_glob, salt_glob, tos_str, outfl=None, time_chunks=5, mask_badsalt=True):
     """Parse POP TEMP iCESM NetCDF files
     """
     top_level = 500.0  # highest ocean level in iCESM (cm)
-    # Note we're grabbing 500 cm depth - should be top-most ocean layer.
-    tinsitu = (xr.open_mfdataset(tinsitu_glob, chunks={'time': time_chunks})
-               .sel(z_t=top_level)
-               .sortby('time'))
+    tinsitu_str = 'tinsitu'
 
-    out = tinsitu[[tinsitu_str, 'time_bound']].rename({tinsitu_str: tos_str})
+    theta = xr.open_mfdataset(temp_glob,  chunks={'time': time_chunks}).sel(
+        z_t=top_level).sortby('time')
+    salt = xr.open_mfdataset(salt_glob, chunks={'time': time_chunks}).sel(
+        z_t=top_level).sortby('time')
+
+    if mask_badsalt:
+        salt['SALT'] = salt['SALT'].where(salt['SALT'] > 0)
+
+    theta[tinsitu_str] = api.pot2insitu_temp(
+        theta, salt, insitu_temp_name=tinsitu_str)
+
+    out = theta[[tinsitu_str, 'time_bound']].rename({tinsitu_str: tos_str})
     if outfl is not None:
         # Write ~SST file
         out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
@@ -263,50 +272,18 @@ def make_sos(salt_glob, sos_str, outfl=None, time_chunks=5, mask_badsalt=True):
 
 
 @reticfox_cli.command(help='Parse POP TEMP, SALT from iCESM output for TEX86 gamma-avg temp')
-@click.option('--tinsitu_glob', help='Glob pattern to input POP in-situ seatemp NetCDF files.')
-@click.option('--toga_str', default='toga', help='Variable name in output NetCDF file.')
-@click.option('--outfl', help='Path for output NetCDF file.')
-@click.option('--tinsitu_str', default='tinsitu', help='Insitu-seatemp variable name in input NetCDF file.')
-@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk.')
-def make_toga(tinsitu_glob, toga_str, outfl=None, tinsitu_str='tinsitu', time_chunks=5):
-    """Parse POP TEMP and SALT iCESM NetCDF files for gamma-average insitu temp
-    """
-    cutoff_z = 20000
-    tinsitu = (xr.open_mfdataset(tinsitu_glob, chunks={'time': time_chunks})
-                 .sel(z_t=slice(0, cutoff_z))
-                 .sortby('time'))
-
-    # Because using z_t slice doesn't get z_w which has depth layers' bounds.
-    # We trim by z_w_bot length because we don't want the bottom of the layer to
-    # be deeper than `cutoff_z`.
-    tinsitu = tinsitu.sel(z_w_bot=slice(0, cutoff_z))
-    tinsitu = tinsitu.isel(z_t=slice(0, len(tinsitu['z_w_bot'])))
-    tinsitu = tinsitu.isel(z_w_top=slice(0, len(tinsitu['z_w_bot'])))
-
-    # get gamma average, add to tinsitu
-    tinsitu[toga_str] = api.tex86_gammaavg_depth(
-        tinsitu, target_var=tinsitu_str)
-
-    out = tinsitu[[toga_str, 'time_bound']]
-    out[toga_str] = tinsitu[toga_str].astype('float32')
-    if outfl is not None:
-        # Write gamma-average file
-        out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')
-    return out
-
-
-@reticfox_cli.command(help='Parse POP TEMP, SALT from iCESM output for insitu seatemps')
 @click.option('--temp_glob', help='Glob pattern to input POP TEMP NetCDF files.')
 @click.option('--salt_glob', help='Glob pattern to input POP SALT NetCDF files.')
-@click.option('--tinsitu_str', default='tinsitu', help='Variable name in output NetCDF file.')
+@click.option('--toga_str', default='toga', help='Variable name in output NetCDF file.')
 @click.option('--outfl', help='Path for output NetCDF file.')
 @click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk.')
 @click.option('--mask_badsalt', is_flag=True, help='Mask-out negative SALT values with NAs?')
-def make_tinsitu(temp_glob, salt_glob, tinsitu_str, outfl=None, time_chunks=5, mask_badsalt=True):
-    """Parse POP TEMP and SALT iCESM NetCDF files for insitu seatemps
+def make_toga(temp_glob, salt_glob, toga_str, outfl=None, time_chunks=5,
+              mask_badsalt=True):
+    """Parse POP TEMP and SALT iCESM NetCDF files for gamma-average insitu temp
     """
     cutoff_z = 20000
-
+    tinsitu_str = 'tinsitu'
     theta = xr.open_mfdataset(temp_glob,  chunks={'time': time_chunks}).sel(
         z_t=slice(0, cutoff_z)).sortby('time')
     salt = xr.open_mfdataset(salt_glob, chunks={'time': time_chunks}).sel(
@@ -315,15 +292,22 @@ def make_tinsitu(temp_glob, salt_glob, tinsitu_str, outfl=None, time_chunks=5, m
     if mask_badsalt:
         salt['SALT'] = salt['SALT'].where(salt['SALT'] > 0)
 
-    # First get in-situ temps from potential temps (TEMP), add to theta
     theta[tinsitu_str] = api.pot2insitu_temp(
         theta, salt, insitu_temp_name=tinsitu_str)
 
-    # Select the bits we need to write out to file. The 'z_w_*' variables
-    # are needed for TEX86 gamma-average calculations so we're including
-    # them here.
-    out = theta[[tinsitu_str, 'time_bound', 'z_w_bot', 'z_w_top']]
-    out[tinsitu_str] = out[tinsitu_str].astype('float32')
+    # Because using z_t slice doesn't get z_w which has depth layers' bounds.
+    # We trim by z_w_bot length because we don't want the bottom of the layer to
+    # be deeper than `cutoff_z`.
+    theta = theta.sel(z_w_bot=slice(0, cutoff_z))
+    theta = theta.isel(z_t=slice(0, len(theta['z_w_bot'])))
+    theta = theta.isel(z_w_top=slice(0, len(theta['z_w_bot'])))
+
+    # get gamma average, add to tinsitu
+    theta[toga_str] = api.tex86_gammaavg_depth(
+        theta, target_var=tinsitu_str)
+
+    out = theta[[toga_str, 'time_bound']]
+    out[toga_str] = out[toga_str].astype('float32')
     if outfl is not None:
         # Write gamma-average file
         out.to_netcdf(outfl, format='NETCDF4', engine='netcdf4')

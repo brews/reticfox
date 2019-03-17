@@ -89,32 +89,21 @@ reticfox make_d18osw \
     --bad_sos_glob "$OUT_DIR/$CASENAME.pop.h.sos.nc" \
     --sos_str "sos"
 
-# Now we're doing gamma-average T and SST slice-by-slice to avoid memory problems
-# from calculating in-situ temperatures.
-slice_names=( "000101-009912" "010001-019912" "020001-029912" "030001-039912" "040001-049912" "050001-059912" "060001-069912" "070001-079912" "080001-090012")
-for i in "${slice_names[@]}"
-do
-    reticfox make_tinsitu \
-        --temp_glob "$IN_DIR/$CASENAME.pop.h.TEMP.$i.nc" \
-        --salt_glob "$IN_DIR/$CASENAME.pop.h.SALT.$i.nc" \
-        --tinsitu_str "tinsitu" \
-        --outfl "$IN_DIR/$CASENAME.pop.h.tinsitu.$i.nc" \
-        --time_chunks "$TIMECHUNKS" \
-        --mask_badsalt
-done
-
 reticfox make_tos \
-    --tinsitu_glob "$IN_DIR/*.tinsitu.*.nc" \
+    --temp_glob "$IN_DIR/$CASENAME.pop.h.TEMP.*.nc" \
+    --salt_glob "$IN_DIR/$CASENAME.pop.h.SALT.*.nc" \
     --tos_str "tos" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.tos.nc" \
-    --tinsitu_str "tinsitu" \
-    --time_chunks "$TIMECHUNKS"
+    --time_chunks "$TIMECHUNKS" \
+    --mask_badsalt
 
 reticfox make_toga \
-    --tinsitu_glob "$IN_DIR/*.tinsitu.*.nc" \
+    --temp_glob "$IN_DIR/$CASENAME.pop.h.TEMP.*.nc" \
+    --salt_glob "$IN_DIR/$CASENAME.pop.h.SALT.*.nc" \
     --toga_str "toGA" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc" \
     --tinsitu_str "tinsitu" \
-    --time_chunks "$TIMECHUNKS"
+    --time_chunks "$TIMECHUNKS" \
+    --mask_badsalt 
 
 date
