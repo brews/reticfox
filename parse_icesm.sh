@@ -102,7 +102,6 @@ reticfox make_toga \
     --salt_glob "$IN_DIR/$CASENAME.pop.h.SALT.*.nc" \
     --toga_str "toGA" \
     --outfl "$OUT_DIR/$CASENAME.pop.h.toGA.nc" \
-    --tinsitu_str "tinsitu" \
     --time_chunks "$TIMECHUNKS" \
     --mask_badsalt 
 
