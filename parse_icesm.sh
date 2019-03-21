@@ -59,7 +59,8 @@ reticfox make_omega \
     --omega_glob "$IN_DIR/*.OMEGA.*.nc" \
     --ps_glob "$IN_DIR/*.PS.*.nc" \
     --omega_str "omega" \
-    --outfl "$OUT_DIR/$CASENAME.cam.h0.omega.nc"
+    --outfl "$OUT_DIR/$CASENAME.cam.h0.omega.nc"\
+    --time_chunks "$TIMECHUNKS"
 
 reticfox make_ddp \
     --precrl_h2o_glob "$IN_DIR/*.PRECRL_H2OR.*.nc" \

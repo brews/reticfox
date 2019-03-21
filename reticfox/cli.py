@@ -115,18 +115,38 @@ def make_ddp(precrc_h2o_glob, precrl_h2o_glob, precsc_h2o_glob, precsl_h2o_glob,
 @click.option('--omega_str', default='omega', help='Variable name in output NetCDF file.')
 @click.option('--outfl', help='Path for output NetCDF file.')
 @click.option('--levels', default=None, help='Pressure levels to interpolate omega to.')
-def make_omega(omega_glob, ps_glob, omega_str, outfl=None, levels=None):
+@click.option('--time_chunks', default=5, help='Number of time steps in each input files chunk.')
+def make_omega(omega_glob, ps_glob, omega_str, outfl=None, levels=None, time_chunks=5):
     """Parse CAM omega iCESM netCDF files and write to outfl.
     """
     # log.debug('working omega files in glob {}'.format(omega_glob))
     if levels is None:
         levels = [500.0]
 
-    ps = xr.open_mfdataset(ps_glob).sortby('time')
-    omega = xr.open_mfdataset(omega_glob).sortby('time')
+    # ps = xr.open_mfdataset(ps_glob).sortby('time')
+    # omega = xr.open_mfdataset(omega_glob).sortby('time')
 
-    omega500 = Ngl.vinth2p(omega.OMEGA.values, omega.hyam.values, omega.hybm.values,
-                           levels, ps.PS.values, 1, 1000.0, 1, True)
+    omega = xr.open_mfdataset(omega_glob, chunks={'time': time_chunks},
+                              data_vars=['OMEGA']).sortby('time')
+    ps = xr.open_mfdataset(ps_glob, chunks={'time': time_chunks}).sortby('time')
+
+    # omega500 = Ngl.vinth2p(omega.OMEGA.values, omega.hyam.values, omega.hybm.values,
+    #                        levels, ps.PS.values, 1, 1000.0, 1, True)
+    # # insitu_temp = xr.apply_ufunc(gsw.pt_from_t, salt.SALT, theta.TEMP, np.array([0]), p,
+    # #                             output_dtypes=['float32'], dask='parallelized')
+
+    # omega500 = dask.delayed(Ngl.vinth2p)(omega.OMEGA, omega.hyam, omega.hybm, levels, ps.PS, 1, 1000.0, 1, True)
+    # omega500 = xr.apply_ufunc(Ngl.vinth2p, omega.OMEGA, omega.hyam, omega.hybm, levels, ps.PS, 1, 1000.0, 1, True, dask='allowed')
+
+    # omega500 = xr.apply_ufunc(Ngl.vinth2p, omega['OMEGA'], omega['hyam'].values, omega['hybm'].values, levels, ps['PS'], 1, 1000.0, 1, True,
+    # output_sizes={'time': omega.dims['time'], 'lev': len(levels), 'lat': omega.dims['lat'], 'lon': omega.dims['lon']}, output_dtypes=['float32'], dask='parallelized')
+
+    # omega500 = xr.apply_ufunc(Ngl.vinth2p, omega['OMEGA'], omega['hyam'], omega['hybm'], np.array([500.0]), ps['PS'], 1, 1000.0, 1, True,
+    #     input_core_dims=[['lev', 'lat', 'lon'], ['lev'], ['lev'], [], ['lat', 'lon'], [], [], [], []],
+    #     output_sizes={'time': omega.dims['time'], 'lev': len(levels), 'lat': omega.dims['lat'], 'lon': omega.dims['lon']},
+    #     output_dtypes=['float32'], dask='parallelized')
+    omega500 = Ngl.vinth2p(omega.OMEGA, omega.hyam, omega.hybm,
+                           [500], ps.PS, 1, 1000.0, 1, True)
 
     # Setup pressure coordinates
     omega.coords['plev'] = ('plev', levels)
