@@ -58,6 +58,9 @@ def tex86_gammaavg_depth(ds, target_var='TEMP', gatemp_name='toga'):
     temp_gamma_avg = (
         ds[target_var] * gamma_weights_norm).sum(dim='z_t')
 
+    # Make NA where original was NA.
+    temp_gamma_avg = temp_gamma_avg.where(ds[target_var].notnull())
+
     # Add metadata attributes.
     temp_gamma_avg.name = str(gatemp_name)
     temp_gamma_avg.attrs['units'] = 'degC'
